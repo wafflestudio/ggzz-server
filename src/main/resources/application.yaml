@@ -1,0 +1,49 @@
+spring:
+  profiles:
+    active: local
+
+  jpa:
+    open-in-view: false
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 20MB
+
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/infp_db
+    username: infp
+    password: INFP_admin_01
+
+cloud:
+  aws:
+    credentials:
+      instance-profile: true
+
+    region:
+      static: ap-northeast-2
+
+    stack:
+      auto: false
+
+    s3:
+      bucket: infp-wackathon
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+
+#springdoc:
+#  swagger-ui:
+#    enabled: false
+#  api-docs:
+#    enabled: false
