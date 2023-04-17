@@ -9,17 +9,20 @@ import com.wafflestudio.ggzz.domain.user.model.UserPrincipal
 import com.wafflestudio.ggzz.domain.user.model.UserToken
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.http.HttpHeaders
+import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.context.request.RequestAttributes
-import org.springframework.web.context.request.RequestContextHolder
+import com.wafflestudio.nostalgia.domain.user.dto.UserDto.*
+
 
 @Service
 @Transactional(readOnly = true)
 class UserService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val authTokenService: AuthTokenService,
 ) {
     @Transactional
     fun signup(request: SignUpRequest) {
@@ -28,21 +31,18 @@ class UserService(
         val user = User(request, passwordEncoder.encode(request.password))
 
         userRepository.save(user)
-
-        val context = SecurityContextHolder.getContext()
-        context.authentication = UserToken(UserPrincipal(user))
-        RequestContextHolder.currentRequestAttributes()
-            .setAttribute("SPRING_SECURITY_CONTEXT", context, RequestAttributes.SCOPE_SESSION)
     }
 
-    fun login(request: LoginRequest) {
+    fun login(request: LoginRequest): ResponseEntity<AuthToken> {
         val user = userRepository.findByUsername(request.username!!) ?: throw LoginFailedException()
 
         if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
 
-        val context = SecurityContextHolder.getContext()
-        context.authentication = UserToken(UserPrincipal(user))
-        RequestContextHolder.currentRequestAttributes()
-            .setAttribute("SPRING_SECURITY_CONTEXT", context, RequestAttributes.SCOPE_SESSION)
+        val accessToken = authTokenService.generateAccessTokenByUsername(request.username).accessToken
+        val refreshToken = authTokenService.generateRefreshTokenByUsername(request.username)
+        user.refreshToken = refreshToken
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(refreshToken).toString())
+            .body(AuthToken(accessToken))
     }
 }

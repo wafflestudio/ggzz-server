@@ -29,10 +29,9 @@ class UserController(
 
     @Operation(summary = "로그인")
     @PostMapping("/login")
-    fun login(@RequestBody @Valid request: UserDto.LoginRequest): ResponseEntity<Any> {
+    fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<AuthToken> {
         logger.info("POST /login")
-        userService.login(request)
-        return ResponseEntity.ok().build()
+        return userService.login(request)
     }
 
     @Operation(summary = "로그인 확인 용도")
