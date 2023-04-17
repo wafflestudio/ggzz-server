@@ -15,6 +15,8 @@ class User(
     val nickname: String,
     val password: String,
 
+    var refreshToken: String? = null,
+
     @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL])
     val letters: MutableList<Letter> = mutableListOf(),
 
