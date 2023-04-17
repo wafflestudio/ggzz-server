@@ -44,4 +44,8 @@ class UserDto {
             }
         }
     }
+
+    data class AuthToken(
+        val accessToken: String,
+    )
 }
