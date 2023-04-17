@@ -14,6 +14,7 @@ class User(
     var username: String?,
     var nickname: String?,
     var password: String?,
+    var refreshToken: String? = null,
     @ElementCollection(targetClass = UserRole::class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     val roles: Set<UserRole> = setOf(UserRole.USER), // 서버 단에서 수동으로 USER -> ADMIN 변경
