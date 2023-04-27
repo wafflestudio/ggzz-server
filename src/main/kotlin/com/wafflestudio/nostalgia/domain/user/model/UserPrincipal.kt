@@ -3,7 +3,7 @@ package com.wafflestudio.nostalgia.domain.user.model
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-class UserPrincipal(private val user: User): UserDetails {
+class UserPrincipal(val user: User) : UserDetails {
     private val authorities = listOf(SimpleGrantedAuthority("USER"))
 
     override fun getAuthorities() = authorities
