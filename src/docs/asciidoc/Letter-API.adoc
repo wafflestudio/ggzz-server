@@ -1,0 +1,32 @@
+[[Letter-API]]
+== Letter API
+
+[[편지-올리기]]
+=== 편지 올리기
+
+operation::postLetter/200[snippets='http-request,request-fields,http-response,response-fields']
+
+[[내-편지-리스트-가져오기]]
+=== 내 편지 리스트 가져오기
+
+operation::getMyLetters/200[snippets='http-request,http-response,response-fields']
+
+[[현재-위치-기준으로-편지-리스트-가져오기]]
+=== 현재 위치 기준으로 편지 리스트 가져오기
+
+operation::getLetters/200[snippets='http-request,query-parameters,http-response,response-fields']
+
+[[현재-위치-기준으로-편지-확인하기]]
+=== 현재 위치 기준으로 편지 확인하기
+
+operation::getLetter/200[snippets='http-request,path-parameters,query-parameters,http-response,response-fields']
+
+[[편지-삭제하기]]
+=== 편지 삭제하기
+
+operation::deleteLetter/200[snippets='http-request,path-parameters,http-response']
+
+[[편지-이미지나-음성-올리기]]
+=== 편지 이미지나 음성 올리기
+
+operation::putResource/200[snippets='http-request,path-parameters,request-parts,http-response,response-fields']

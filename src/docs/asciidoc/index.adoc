@@ -1,0 +1,14 @@
+:includedir: src/docs/asciidoc
+
+= 끄적 API Documentation
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+include::{includedir}/User-API.adoc[]
+
+include::{includedir}/Letter-API.adoc[]
+
