@@ -7,6 +7,7 @@ plugins {
     kotlin("jvm") version "1.7.22"
     kotlin("plugin.spring") version "1.7.22"
     kotlin("plugin.jpa") version "1.7.22"
+    id("org.asciidoctor.jvm.convert") version "3.3.2"
 }
 
 group = "com.wafflestudio"
@@ -16,6 +17,8 @@ java.sourceCompatibility = JavaVersion.VERSION_17
 repositories {
     mavenCentral()
 }
+
+val asciidoctorExt: Configuration by configurations.creating
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -34,6 +37,13 @@ dependencies {
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
+
+    // Spring Rest Docs
+    testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
+    asciidoctorExt("org.springframework.restdocs:spring-restdocs-asciidoctor")
+
+    // Mockito
+    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -45,4 +55,31 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks {
+    val snippetsDir by extra { file("build/generated-snippets") }
+
+    test {
+        outputs.dir(snippetsDir)
+    }
+
+    asciidoctor {
+        inputs.dir(snippetsDir)
+        configurations(asciidoctorExt.name)
+        dependsOn(test)
+        doFirst {
+            delete("src/main/resources/static/docs")
+        }
+        doLast {
+            copy {
+                from("build/docs/asciidoc")
+                into("src/main/resources/static/docs")
+            }
+        }
+    }
+
+    build {
+        dependsOn(asciidoctor)
+    }
 }
