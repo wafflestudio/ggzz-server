@@ -1,3 +1,3 @@
-# nostalgia-server
+# ggzz-server
 
-Team 향수(Nostalgia)의 서버입니다.
+Team 향수(Nostalgia)의 끄적(ggzz) 서버입니다.
