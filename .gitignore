@@ -36,4 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### API Docs ###
 src/main/resources/static/docs/
+
+### Mac OS ###
+.DS_Store
