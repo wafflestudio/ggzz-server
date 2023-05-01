@@ -14,7 +14,7 @@ version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
 tasks.bootJar {
-    archiveFileName.set("nostalgia-server.jar")
+    archiveFileName.set("ggzz-server.jar")
 }
 
 repositories {
