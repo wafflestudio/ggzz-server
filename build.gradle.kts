@@ -35,6 +35,8 @@ dependencies {
     implementation("aws.sdk.kotlin:s3:0.16.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
+    implementation("software.amazon.awssdk:secretsmanager:2.20.5")
+    implementation("software.amazon.awssdk:sts:2.20.7")
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
