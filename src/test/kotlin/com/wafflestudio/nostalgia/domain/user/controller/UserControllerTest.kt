@@ -37,6 +37,9 @@ internal class UserControllerTest {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @MockBean
+    private lateinit var userService: UserService
+
     private lateinit var mockMvc: MockMvc
 
     @BeforeEach
