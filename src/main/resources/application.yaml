@@ -28,7 +28,7 @@ cloud:
     stack:
       auto: false
     s3:
-      bucket: infp-wackathon
+      bucket: ggzz-bucket-dev
 
 ---
 
@@ -49,4 +49,4 @@ server:
 
 spring.config.activate.on-profile: dev
 
-secretNames: dev/ggzz-server
+secrets-manager: dev/ggzz-server
