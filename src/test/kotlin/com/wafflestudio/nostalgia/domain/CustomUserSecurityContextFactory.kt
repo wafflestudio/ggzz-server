@@ -9,7 +9,7 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 
 class CustomUserSecurityContextFactory : WithSecurityContextFactory<WithCustomUser> {
     override fun createSecurityContext(customUserAnnotation: WithCustomUser): SecurityContext {
-        val user = User("username", "nickname", "password")
+        val user = User(customUserAnnotation.username, customUserAnnotation.nickname, customUserAnnotation.password)
         val userPrincipal = UserPrincipal(user)
         val userToken = UserToken(userPrincipal)
 
