@@ -80,3 +80,4 @@ class SecurityConfig(
         return AuthenticationManager { throw IllegalStateException("Authentication Manager is not used.") }
     }
 }
+
