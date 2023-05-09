@@ -1,8 +1,8 @@
-package com.wafflestudio.nostalgia.domain.user.controller
+package com.wafflestudio.ggzz.domain.user.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.wafflestudio.nostalgia.domain.user.dto.UserDto
-import com.wafflestudio.nostalgia.domain.user.service.UserService
+import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.service.UserService
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*

@@ -1,8 +1,8 @@
-package com.wafflestudio.nostalgia.domain
+package com.wafflestudio.ggzz.domain
 
-import com.wafflestudio.nostalgia.domain.user.model.User
-import com.wafflestudio.nostalgia.domain.user.model.UserPrincipal
-import com.wafflestudio.nostalgia.domain.user.model.UserToken
+import com.wafflestudio.ggzz.domain.user.model.User
+import com.wafflestudio.ggzz.domain.user.model.UserPrincipal
+import com.wafflestudio.ggzz.domain.user.model.UserToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.context.support.WithSecurityContextFactory

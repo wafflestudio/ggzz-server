@@ -1,4 +1,4 @@
-package com.wafflestudio.nostalgia.domain
+package com.wafflestudio.ggzz.domain
 
 import org.springframework.security.test.context.support.WithSecurityContext
 

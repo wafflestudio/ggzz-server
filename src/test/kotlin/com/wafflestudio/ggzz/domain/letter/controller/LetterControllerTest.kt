@@ -1,23 +1,20 @@
-package com.wafflestudio.nostalgia.domain.letter.controller
+package com.wafflestudio.ggzz.domain.letter.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.wafflestudio.nostalgia.domain.ApiDocumentUtils.Companion.getDocumentRequest
-import com.wafflestudio.nostalgia.domain.ApiDocumentUtils.Companion.getDocumentResponse
-import com.wafflestudio.nostalgia.domain.WithCustomUser
-import com.wafflestudio.nostalgia.domain.letter.dto.LetterDto
-import com.wafflestudio.nostalgia.domain.letter.model.Letter
-import com.wafflestudio.nostalgia.domain.letter.service.LetterService
-import com.wafflestudio.nostalgia.domain.user.model.UserPrincipal
-import com.wafflestudio.nostalgia.global.common.dto.ListResponse
+import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentRequest
+import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentResponse
+import com.wafflestudio.ggzz.domain.WithCustomUser
+import com.wafflestudio.ggzz.domain.letter.dto.LetterDto
+import com.wafflestudio.ggzz.domain.letter.model.Letter
+import com.wafflestudio.ggzz.domain.letter.service.LetterService
+import com.wafflestudio.ggzz.domain.user.model.UserPrincipal
+import com.wafflestudio.ggzz.global.common.dto.ListResponse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
 import org.mockito.BDDMockito.given
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doNothing
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
@@ -105,8 +102,8 @@ internal class LetterControllerTest {
                     ),
                     responseFields(
                         fieldWithPath("id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("created_at").description("편지 생성일자"),
-                        fieldWithPath("created_by").description("편지 생성자 닉네임"),
+                        fieldWithPath("createdAt").description("편지 생성일자"),
+                        fieldWithPath("createdBy").description("편지 생성자 닉네임"),
                         fieldWithPath("title").description("편지 제목"),
                         fieldWithPath("summary").description("편지 내용"),
                         fieldWithPath("longitude").description("경도"),
@@ -155,8 +152,8 @@ internal class LetterControllerTest {
                     responseFields(
                         fieldWithPath("count").description("내 편지 개수"),
                         fieldWithPath("data[].id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("data[].created_at").description("편지 생성일자"),
-                        fieldWithPath("data[].created_by").description("편지 생성자 닉네임"),
+                        fieldWithPath("data[].createdAt").description("편지 생성일자"),
+                        fieldWithPath("data[].createdBy").description("편지 생성자 닉네임"),
                         fieldWithPath("data[].title").description("편지 제목"),
                         fieldWithPath("data[].summary").description("편지 내용"),
                         fieldWithPath("data[].longitude").description("경도"),
@@ -212,8 +209,8 @@ internal class LetterControllerTest {
                     ),
                     responseFields(
                         fieldWithPath("id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("created_at").description("편지 생성일자"),
-                        fieldWithPath("created_by").description("편지 생성자 닉네임"),
+                        fieldWithPath("createdAt").description("편지 생성일자"),
+                        fieldWithPath("createdBy").description("편지 생성자 닉네임"),
                         fieldWithPath("title").description("편지 제목"),
                         fieldWithPath("summary").description("편지 내용"),
                         fieldWithPath("longitude").description("경도"),
