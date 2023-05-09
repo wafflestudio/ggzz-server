@@ -1,30 +1,19 @@
-package com.wafflestudio.nostalgia.domain.letter.controller
+package com.wafflestudio.ggzz.domain.letter.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.wafflestudio.nostalgia.domain.ApiDocumentUtils
-import com.wafflestudio.nostalgia.domain.ApiDocumentUtils.Companion.getDocumentRequest
-import com.wafflestudio.nostalgia.domain.ApiDocumentUtils.Companion.getDocumentResponse
-import com.wafflestudio.nostalgia.domain.WithCustomUser
-import com.wafflestudio.nostalgia.domain.letter.dto.LetterDto
-import com.wafflestudio.nostalgia.domain.letter.model.Letter
-import com.wafflestudio.nostalgia.domain.letter.service.LetterService
-import com.wafflestudio.nostalgia.domain.user.model.CurrentUser
-import com.wafflestudio.nostalgia.domain.user.model.User
-import com.wafflestudio.nostalgia.domain.user.model.UserPrincipal
-import com.wafflestudio.nostalgia.domain.user.model.UserToken
-import com.wafflestudio.nostalgia.domain.user.repository.UserRepository
-import com.wafflestudio.nostalgia.global.common.dto.ListResponse
+import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentRequest
+import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentResponse
+import com.wafflestudio.ggzz.domain.WithCustomUser
+import com.wafflestudio.ggzz.domain.letter.dto.LetterDto
+import com.wafflestudio.ggzz.domain.letter.service.LetterService
+import com.wafflestudio.ggzz.global.common.dto.ListResponse
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.BDDMockito.given
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.restdocs.RestDocumentationContextProvider
@@ -32,21 +21,12 @@ import org.springframework.restdocs.RestDocumentationExtension
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
-import org.springframework.restdocs.payload.PayloadDocumentation
 import org.springframework.restdocs.payload.PayloadDocumentation.*
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.request.RequestPostProcessor
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
 import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDateTime
 
@@ -93,8 +73,8 @@ internal class MyLetterControllerTest {
                     responseFields(
                         fieldWithPath("count").description("내 편지 개수"),
                         fieldWithPath("data[].id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("data[].created_at").description("편지 생성일자"),
-                        fieldWithPath("data[].created_by").description("편지 생성자 닉네임"),
+                        fieldWithPath("data[].createdAt").description("편지 생성일자"),
+                        fieldWithPath("data[].createdBy").description("편지 생성자 닉네임"),
                         fieldWithPath("data[].title").description("편지 제목"),
                         fieldWithPath("data[].summary").description("편지 내용"),
                         fieldWithPath("data[].longitude").description("경도"),

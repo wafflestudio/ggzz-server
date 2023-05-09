@@ -1,4 +1,4 @@
-package com.wafflestudio.nostalgia.domain
+package com.wafflestudio.ggzz.domain
 
 import org.springframework.restdocs.operation.preprocess.OperationRequestPreprocessor
 import org.springframework.restdocs.operation.preprocess.OperationResponsePreprocessor
