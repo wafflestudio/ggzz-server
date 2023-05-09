@@ -3,7 +3,8 @@ package com.wafflestudio.ggzz.domain.user.model
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 
-class UserPrincipal(private val user: User): UserDetails {
+
+class UserPrincipal(val user: User) : UserDetails {
     private val authorities = listOf(SimpleGrantedAuthority("USER"))
 
     override fun getAuthorities() = authorities
@@ -15,3 +16,5 @@ class UserPrincipal(private val user: User): UserDetails {
     override fun isEnabled() = true
     val id = user.id
 }
+
+
