@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import com.wafflestudio.nostalgia.domain.user.dto.UserDto.*
+import com.wafflestudio.nostalgia.global.error.InvalidTokenException
+import com.wafflestudio.nostalgia.global.error.NotLoggedInException
 import org.springframework.http.ResponseCookie
 
 
@@ -60,5 +62,19 @@ class UserService(
             .build().toString()
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).build()
+    }
+
+    fun refresh(refreshToken: String): ResponseEntity<AuthToken> {
+        val username = authTokenService.getUsernameFromToken(refreshToken, Type.REFRESH)
+        val user = userRepository.findByUsername(username) ?: throw InvalidTokenException("Refresh")
+        user.refreshToken ?: throw NotLoggedInException()
+        if (refreshToken != user.refreshToken) throw InvalidTokenException("Refresh")
+
+        val accessToken = authTokenService.generateAccessTokenByUsername(username)
+        val newRefreshToken = authTokenService.generateRefreshTokenByUsername(username)
+        user.refreshToken = newRefreshToken
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(newRefreshToken).toString())
+            .body(AuthToken(accessToken))
     }
 }
