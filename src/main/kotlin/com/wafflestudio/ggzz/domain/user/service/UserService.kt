@@ -5,6 +5,8 @@ import com.wafflestudio.ggzz.domain.user.dto.UserDto.AuthToken
 import com.wafflestudio.ggzz.domain.user.exception.LoginFailedException
 import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
 import com.wafflestudio.ggzz.domain.user.exception.UserNotFoundException
+import com.wafflestudio.ggzz.domain.user.exception.InvalidTokenException
+import com.wafflestudio.ggzz.domain.user.exception.NotLoggedInException
 import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import org.springframework.http.HttpHeaders
@@ -71,5 +73,19 @@ internal class UserServiceImpl(
             .build().toString()
 
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).build()
+    }
+
+    fun refresh(refreshToken: String): ResponseEntity<AuthToken> {
+        val username = authTokenService.getUsernameFromToken(refreshToken, Type.REFRESH)
+        val user = userRepository.findByUsername(username) ?: throw InvalidTokenException("Refresh")
+        user.refreshToken ?: throw NotLoggedInException()
+        if (refreshToken != user.refreshToken) throw InvalidTokenException("Refresh")
+
+        val accessToken = authTokenService.generateAccessTokenByUsername(username)
+        val newRefreshToken = authTokenService.generateRefreshTokenByUsername(username)
+        user.refreshToken = newRefreshToken
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(newRefreshToken).toString())
+            .body(AuthToken(accessToken))
     }
 }

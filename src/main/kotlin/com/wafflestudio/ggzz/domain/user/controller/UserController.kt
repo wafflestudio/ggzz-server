@@ -47,4 +47,11 @@ class UserController(
         logger.info("POST /logout")
         return userService.logout(userId)
     }
+
+    @Operation(summary = "accessToken 재발급")
+    @PostMapping("/refresh")
+    fun refresh(@CookieValue(value = "refreshToken") refreshToken: String): ResponseEntity<AuthToken> {
+        logger.info("POST /refresh")
+        return userService.refresh(refreshToken)
+    }
 }
