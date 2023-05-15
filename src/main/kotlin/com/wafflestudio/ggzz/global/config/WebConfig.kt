@@ -23,10 +23,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class WebConfig(
     private val authInterceptor: AuthInterceptor,
+    private val authArgumentResolver: AuthArgumentResolver,
 ) : WebMvcConfigurer {
 
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(authInterceptor).addPathPatterns("/api/v1/**")
+    }
+
+    override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
+        resolvers.add(authArgumentResolver)
     }
 }
 
@@ -47,5 +52,23 @@ class AuthInterceptor(
             request.setAttribute("username", username)
         }
         return super.preHandle(request, response, handler)
+    }
+}
+
+@Configuration
+class AuthArgumentResolver : HandlerMethodArgumentResolver {
+    override fun supportsParameter(parameter: MethodParameter): Boolean {
+        return parameter.hasParameterAnnotation(UserContext::class.java) &&
+                parameter.parameterType == String::class.java
+    }
+
+    override fun resolveArgument(
+        parameter: MethodParameter,
+        mavContainer: ModelAndViewContainer?,
+        webRequest: NativeWebRequest,
+        binderFactory: WebDataBinderFactory?
+    ): Any? {
+        parameter.hasMethodAnnotation(UserContext::class.java)
+        return (webRequest as ServletWebRequest).request.getAttribute("username")
     }
 }
