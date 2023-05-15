@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
+import org.springframework.http.ResponseCookie
+
 
 interface UserService {
     fun updateOrCreate(request: UserDto.SignUpRequest): User
@@ -48,10 +50,26 @@ internal class UserServiceImpl(
 
         if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
 
-        val accessToken = authTokenService.generateAccessTokenByUsername(request.username).accessToken
+        val accessToken = authTokenService.generateAccessTokenByUsername(request.username)
         val refreshToken = authTokenService.generateRefreshTokenByUsername(request.username)
         user.refreshToken = refreshToken
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(refreshToken).toString())
             .body(AuthToken(accessToken))
+    }
+
+    fun logout(userId: Long): ResponseEntity<Any> {
+        val user = userRepository.findMeById(userId)
+        user.refreshToken = null
+
+        val cookie = ResponseCookie.from("refreshToken", "")
+            .httpOnly(true)
+            .secure(true)
+            .sameSite("None")
+            .path("/")
+            .maxAge(0)
+            .build().toString()
+
+        return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).build()
+    }
 }
