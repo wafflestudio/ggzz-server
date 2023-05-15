@@ -14,6 +14,7 @@ enum class ErrorType {
         UNSUPPORTED_FILE_TYPE(3),
         FILE_TOO_LARGE(4),
         UNSATISFIED_REQUEST(5),
+        INVALID_TOKEN(6),
         ;
         override fun getCode(): Int = code
     }
@@ -22,6 +23,7 @@ enum class ErrorType {
         NOT_LOGGED_IN(1000),
         LOGIN_FAIL(1001),
         INVALID_FIREBASE_TOKEN(1002),
+        TOKEN_EXPIRED(1003),
         ;
         override fun getCode(): Int = code
     }
@@ -29,6 +31,7 @@ enum class ErrorType {
     enum class Forbidden(private val code: Int): ErrorTypeInterface {
         WRONG_API(3000),
         LETTER_DELETE_FORBIDDEN(3001),
+        NO_TOKEN(3002),
         ;
         override fun getCode(): Int = code
     }
