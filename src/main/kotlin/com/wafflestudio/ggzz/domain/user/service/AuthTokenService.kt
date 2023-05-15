@@ -21,14 +21,14 @@ class AuthTokenService (
     private val tokenPrefix = "Bearer "
     private val signingKey = Keys.hmacShaKeyFor(authProperties.jwtSecret.toByteArray())
 
-    fun generateAccessTokenByUsername(username: String): String {
+    fun generateTokenByUsername(username: String, type: Type): String {
         val claims: Claims = Jwts.claims()
         claims["username"] = username
         val issuer = authProperties.issuer
         val expiryDate: Date = Date.from(
             LocalDateTime
                 .now()
-                .plusSeconds(authProperties.jwtExpiration)
+                .plusSeconds(if (type == Type.ACCESS) authProperties.jwtExpiration else authProperties.refreshExpiration)
                 .atZone(ZoneId.systemDefault())
                 .toInstant()
         )
@@ -41,24 +41,6 @@ class AuthTokenService (
 
     }
 
-    fun generateRefreshTokenByUsername(username: String): String {
-        val claims: Claims = Jwts.claims()
-        claims["username"] = username
-        val issuer = authProperties.issuer
-        val expiryDate: Date = Date.from(
-            LocalDateTime
-                .now()
-                .plusSeconds(authProperties.refreshExpiration)
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-        )
-        return Jwts.builder()
-            .setClaims(claims)
-            .setIssuer(issuer)
-            .setExpiration(expiryDate)
-            .signWith(signingKey, SignatureAlgorithm.HS256)
-            .compact()
-    }
 
     fun getUsernameFromToken(authToken: String, type: Type): String {
         return try {
