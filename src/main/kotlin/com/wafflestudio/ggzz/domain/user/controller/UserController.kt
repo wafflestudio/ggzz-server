@@ -3,10 +3,10 @@ package com.wafflestudio.ggzz.domain.user.controller
 import com.wafflestudio.ggzz.domain.user.dto.UserDto
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
+import com.wafflestudio.ggzz.domain.user.model.CurrentUser
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -41,18 +41,10 @@ class UserController(
         return ResponseEntity.ok().build()
     }
 
-    @Operation(summary = "로그아웃: JSESSIONID 쿠키 삭제 용도")
+    @Operation(summary = "로그아웃: refreshToken 쿠키 삭제 용도")
     @PostMapping("/logout")
-    fun logout(): ResponseEntity<Any> {
+    fun logout(@CurrentUser userId: Long): ResponseEntity<Any> {
         logger.info("POST /logout")
-        val cookie = ResponseCookie.from("JSESSIONID", "")
-            .maxAge(0)
-            .path("/")
-            .secure(true)
-            .sameSite("None")
-            .httpOnly(true)
-            .build().toString()
-
-        return ResponseEntity.ok().header("Set-cookie", cookie).build()
+        return userService.logout(userId)
     }
 }
