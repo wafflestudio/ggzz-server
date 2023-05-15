@@ -36,6 +36,7 @@ class UserService(
         userRepository.save(user)
     }
 
+    @Transactional
     fun login(request: LoginRequest): ResponseEntity<AuthToken> {
         val user = userRepository.findByUsername(request.username!!) ?: throw LoginFailedException()
 
@@ -49,6 +50,7 @@ class UserService(
             .body(AuthToken(accessToken))
     }
 
+    @Transactional
     fun logout(userId: Long): ResponseEntity<Any> {
         val user = userRepository.findMeById(userId)
         user.refreshToken = null
@@ -64,6 +66,7 @@ class UserService(
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).build()
     }
 
+    @Transactional
     fun refresh(refreshToken: String): ResponseEntity<AuthToken> {
         val username = authTokenService.getUsernameFromToken(refreshToken, Type.REFRESH)
         val user = userRepository.findByUsername(username) ?: throw InvalidTokenException("Refresh")
