@@ -52,8 +52,8 @@ internal class UserServiceImpl(
 
         if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
 
-        val accessToken = authTokenService.generateAccessTokenByUsername(request.username)
-        val refreshToken = authTokenService.generateRefreshTokenByUsername(request.username)
+        val accessToken = authTokenService.generateTokenByUsername(request.username, Type.ACCESS)
+        val refreshToken = authTokenService.generateTokenByUsername(request.username, Type.REFRESH)
         user.refreshToken = refreshToken
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(refreshToken).toString())
@@ -81,8 +81,8 @@ internal class UserServiceImpl(
         user.refreshToken ?: throw NotLoggedInException()
         if (refreshToken != user.refreshToken) throw InvalidTokenException("Refresh")
 
-        val accessToken = authTokenService.generateAccessTokenByUsername(username)
-        val newRefreshToken = authTokenService.generateRefreshTokenByUsername(username)
+        val accessToken = authTokenService.generateTokenByUsername(username, Type.ACCESS)
+        val newRefreshToken = authTokenService.generateTokenByUsername(username, Type.REFRESH)
         user.refreshToken = newRefreshToken
         return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(newRefreshToken).toString())
