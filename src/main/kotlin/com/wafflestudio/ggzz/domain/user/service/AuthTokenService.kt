@@ -1,8 +1,12 @@
-package com.wafflestudio.nostalgia.domain.user.service
+package com.wafflestudio.ggzz.domain.user.service
 
-import com.wafflestudio.nostalgia.global.error.InvalidTokenException
-import com.wafflestudio.nostalgia.global.error.TokenExpiredException
-import io.jsonwebtoken.*
+import com.wafflestudio.ggzz.global.error.InvalidTokenException
+import com.wafflestudio.ggzz.global.error.TokenExpiredException
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.ExpiredJwtException
+import io.jsonwebtoken.Jws
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

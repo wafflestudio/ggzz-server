@@ -1,6 +1,7 @@
 package com.wafflestudio.ggzz.domain.user.controller
 
-import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.AuthToken
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.domain.user.model.CurrentUser
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.CookieValue
 
 @RestController
 class UserController(
