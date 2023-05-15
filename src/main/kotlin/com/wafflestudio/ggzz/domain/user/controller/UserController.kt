@@ -1,6 +1,9 @@
 package com.wafflestudio.ggzz.domain.user.controller
 
 import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.AuthToken
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.domain.user.model.CurrentUser
 import io.swagger.v3.oas.annotations.Operation
@@ -11,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.CookieValue
 
 @RestController
 class UserController(
@@ -20,7 +24,7 @@ class UserController(
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    fun signup(@RequestBody @Valid request: UserDto.SignUpRequest): ResponseEntity<UserDto.UserResponse> {
+    fun signup(@RequestBody @Valid request: SignUpRequest): ResponseEntity<UserDto.UserResponse> {
         logger.info("POST /signup")
         val user = userService.updateOrCreate(request)
         val userResponse = UserDto.UserResponse.fromEntity(user)

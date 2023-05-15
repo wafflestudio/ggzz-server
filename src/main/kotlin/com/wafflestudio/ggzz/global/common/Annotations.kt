@@ -1,4 +1,4 @@
-package com.wafflestudio.nostalgia.global.common
+package com.wafflestudio.ggzz.global.common
 
 annotation class Authenticated
 

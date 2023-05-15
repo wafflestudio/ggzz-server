@@ -1,4 +1,4 @@
-package com.wafflestudio.nostalgia.domain.user.service
+package com.wafflestudio.ggzz.domain.user.service
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 

@@ -1,11 +1,11 @@
-package com.wafflestudio.nostalgia.global.config
+package com.wafflestudio.ggzz.global.config
 
-import com.wafflestudio.nostalgia.domain.user.repository.UserRepository
-import com.wafflestudio.nostalgia.domain.user.service.AuthTokenService
-import com.wafflestudio.nostalgia.domain.user.service.Type
-import com.wafflestudio.nostalgia.global.common.Authenticated
-import com.wafflestudio.nostalgia.global.common.UserContext
-import com.wafflestudio.nostalgia.global.error.*
+import com.wafflestudio.ggzz.domain.user.repository.UserRepository
+import com.wafflestudio.ggzz.domain.user.service.AuthTokenService
+import com.wafflestudio.ggzz.domain.user.service.Type
+import com.wafflestudio.ggzz.global.common.Authenticated
+import com.wafflestudio.ggzz.global.common.UserContext
+import com.wafflestudio.ggzz.global.error.*
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.context.annotation.Configuration
