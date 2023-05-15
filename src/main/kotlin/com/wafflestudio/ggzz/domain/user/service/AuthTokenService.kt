@@ -85,7 +85,7 @@ class AuthTokenService (
             .secure(true)
             .sameSite("None")
             .path("/")
-            .maxAge(3600)
+            .maxAge(authProperties.jwtExpiration)
             .build()
     }
 }
