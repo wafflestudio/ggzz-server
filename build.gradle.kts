@@ -50,6 +50,9 @@ dependencies {
 
     // Mockito
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+
+    // H2
+    implementation("com.h2database:h2")
 }
 
 tasks.withType<KotlinCompile> {
