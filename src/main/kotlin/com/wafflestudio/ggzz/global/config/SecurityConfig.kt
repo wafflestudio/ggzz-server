@@ -27,7 +27,7 @@ class SecurityConfig(
             "http://localhost:3000"
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
-        private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
+        private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/**")
         private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout")
     }
 
