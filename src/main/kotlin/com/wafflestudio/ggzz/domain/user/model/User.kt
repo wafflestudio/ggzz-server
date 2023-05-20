@@ -20,8 +20,8 @@ class User(
     @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL])
     val letters: MutableList<Letter> = mutableListOf(),
 
-    ): BaseTimeTraceEntity() {
-    constructor(request: SignUpRequest, encodedPassword: String): this(
+    ) : BaseTimeTraceEntity() {
+    constructor(request: SignUpRequest, encodedPassword: String) : this(
         username = request.username!!,
         nickname = request.nickname!!,
         password = encodedPassword
