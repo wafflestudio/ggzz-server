@@ -1,0 +1,30 @@
+name: GGZZ Gradle CI
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  continuous-integration:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        jdk-version: [ 17 ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up JDK ${{ matrix.jdk-version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.jdk-version }}
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execution permission
+        run: chmod +x ./gradlew
+
+      - name: Run Tests
+        run: ./gradlew test --no-daemon
