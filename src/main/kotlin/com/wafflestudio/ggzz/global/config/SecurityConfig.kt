@@ -28,7 +28,7 @@ class SecurityConfig(
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
-        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout")
+        private val POST_WHITELIST = arrayOf("/api/v1/verifyToken", "/signup", "/login", "/logout")
     }
 
     @Bean

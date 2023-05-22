@@ -1,5 +1,6 @@
 package com.wafflestudio.ggzz.domain.user.controller
 
+import com.google.firebase.auth.FirebaseAuth
 import com.wafflestudio.ggzz.domain.user.dto.UserDto
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
@@ -18,6 +19,19 @@ class UserController(
     private val userService: UserService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    @Operation(summary = "Firebase 토큰 검증")
+    @PostMapping("/api/v1/verifyToken")
+    fun verifyToken(@RequestBody token: String): String {
+        val decodedToken = FirebaseAuth.getInstance().verifyIdToken(token)
+        val uid = decodedToken.uid
+
+        // 필요 시 decodedToken에서 추출 후 userRepository.save하는 fun 정의 요망
+        // val email = decodedToken.email
+        // val displayName = decodedToken.name
+
+        return uid
+    }
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
