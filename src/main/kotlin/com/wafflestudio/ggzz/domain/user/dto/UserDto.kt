@@ -24,4 +24,8 @@ class UserDto {
         @field: NotBlank
         val password: String?
     )
+
+    data class AuthToken(
+        val accessToken: String,
+    )
 }
