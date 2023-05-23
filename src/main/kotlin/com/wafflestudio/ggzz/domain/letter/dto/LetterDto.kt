@@ -25,7 +25,9 @@ class LetterDto {
         @Schema(title = "편지 내용(글)", required = false)
         val text: String?,
         @Schema(title = "편지 공개 시간", required = false)
-        val viewableTime: Int? = 24
+        val viewableTime: Int? = 0,
+        @Schema(title = "편지 공개 범위", required = false)
+        val viewRange: Int? = 0
     )
 
     data class Response(

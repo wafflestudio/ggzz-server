@@ -39,7 +39,6 @@ class LetterService(
 
     companion object {
         private const val EARTH_RADIUS_IN_KM = 6371
-        private const val CONCEDE = 10
     }
 
     @Transactional
@@ -65,13 +64,13 @@ class LetterService(
             throw LetterViewableTimeExpiredException()
         }
         val letterPos = letter.longitude to letter.latitude
-        if (distanceBetweenTwoPositionInMeter(pos, letterPos) > CONCEDE)
-            throw LetterNotCloseEnoughException()
+        if (letter.viewRange != 0 && distanceBetweenTwoPositionInMeter(pos, letterPos) > letter.viewRange)
+            throw LetterNotCloseEnoughException(letter.viewRange)
         return DetailResponse(letter)
     }
 
     private fun updateViewable(letter: Letter) {
-        if (letter.viewableTime != null && letter.isViewable && ChronoUnit.HOURS.between(
+        if (letter.viewableTime != 0 && letter.isViewable && ChronoUnit.HOURS.between(
                 letter.createdAt,
                 LocalDateTime.now()
             ) >= letter.viewableTime
@@ -83,7 +82,7 @@ class LetterService(
     @Transactional
     @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul") // every 4AM
     fun updateAllViewable() {
-        val letters = letterRepository.findAllByViewableTimeIsNotNullAndIsViewableTrue()
+        val letters = letterRepository.findAllByIsViewableTrueAndViewableTimeNot(0)
         for (letter in letters) {
             updateViewable(letter)
         }

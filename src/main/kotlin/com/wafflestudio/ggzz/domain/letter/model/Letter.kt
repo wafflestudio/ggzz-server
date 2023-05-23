@@ -19,7 +19,8 @@ class Letter(
     var image: String?,
     var voice: String?,
     var isViewable: Boolean = true,
-    val viewableTime: Int? = 24
+    val viewableTime: Int = 0,
+    val viewRange: Int = 0
 ) : BaseTimeTraceEntity() {
     constructor(user: User, request: CreateRequest) : this(
         user = user,
@@ -30,7 +31,8 @@ class Letter(
         text = request.text,
         image = null,
         voice = null,
-        viewableTime = request.viewableTime
+        viewableTime = request.viewableTime!!,
+        viewRange = request.viewRange!!
     ) {
         user.letters.add(this)
     }
