@@ -3,4 +3,5 @@ WORKDIR /app
 COPY . /app
 RUN ./gradlew bootJar
 EXPOSE 8080
-CMD java -jar build/libs/ggzz-server.jar
+ENTRYPOINT ["java", "-jar", "build/libs/ggzz-server.jar"]
+CMD ["--spring.profiles.active=dev"]

@@ -73,8 +73,8 @@ internal class MyLetterControllerTest {
                     responseFields(
                         fieldWithPath("count").description("내 편지 개수"),
                         fieldWithPath("data[].id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("data[].createdAt").description("편지 생성일자"),
-                        fieldWithPath("data[].createdBy").description("편지 생성자 닉네임"),
+                        fieldWithPath("data[].created_at").description("편지 생성일자"),
+                        fieldWithPath("data[].created_by").description("편지 생성자 닉네임"),
                         fieldWithPath("data[].title").description("편지 제목"),
                         fieldWithPath("data[].summary").description("편지 내용"),
                         fieldWithPath("data[].longitude").description("경도"),
