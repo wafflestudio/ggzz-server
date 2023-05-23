@@ -17,13 +17,15 @@ class LetterDto {
         @field:NotBlank
         val summary: String?,
         @Schema(title = "경도", required = true, format = "-180 ~ 180", type = "double")
-        @field:[NotNull Range(min=-180, max=180)]
+        @field:[NotNull Range(min = -180, max = 180)]
         val longitude: Double?,
         @Schema(title = "위도", required = true, format = "-90 ~ 90", type = "double")
-        @field:[NotNull Range(min=-90, max=90)]
+        @field:[NotNull Range(min = -90, max = 90)]
         val latitude: Double?,
         @Schema(title = "편지 내용(글)", required = false)
-        val text: String?
+        val text: String?,
+        @Schema(title = "편지 공개 시간", required = false)
+        val viewableTime: Int? = 24
     )
 
     data class Response(
@@ -41,8 +43,8 @@ class LetterDto {
         val longitude: Double,
         @Schema(title = "위도")
         val latitude: Double
-    ): TimeTraceDto.Response(id, createdAt) {
-        constructor(letter: Letter): this(
+    ) : TimeTraceDto.Response(id, createdAt) {
+        constructor(letter: Letter) : this(
             id = letter.id,
             createdAt = letter.createdAt,
             createdBy = letter.user.nickname,
@@ -74,8 +76,8 @@ class LetterDto {
         val image: String?,
         @Schema(title = "편지 내용(음성)")
         val voice: String?
-    ): TimeTraceDto.Response(id, createdAt) {
-        constructor(letter: Letter): this(
+    ) : TimeTraceDto.Response(id, createdAt) {
+        constructor(letter: Letter) : this(
             id = letter.id,
             createdAt = letter.createdAt,
             createdBy = letter.user.nickname,

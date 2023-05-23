@@ -18,7 +18,9 @@ class Letter(
     var text: String?,
     var image: String?,
     var voice: String?,
-): BaseTimeTraceEntity() {
+    var isViewable: Boolean = true,
+    val viewableTime: Int? = 24
+) : BaseTimeTraceEntity() {
     constructor(user: User, request: CreateRequest) : this(
         user = user,
         title = request.title!!,
@@ -28,6 +30,7 @@ class Letter(
         text = request.text,
         image = null,
         voice = null,
+        viewableTime = request.viewableTime
     ) {
         user.letters.add(this)
     }

@@ -13,10 +13,13 @@ import com.wafflestudio.ggzz.domain.letter.repository.LetterRepository
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.common.dto.ListResponse
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -49,16 +52,41 @@ class LetterService(
     fun getLetters(pos: Pair<Double, Double>, range: Int): ListResponse<Response> {
         return ListResponse(letterRepository.findAll().filter { letter ->
             val letterPos = letter.longitude to letter.latitude
-            distanceBetweenTwoPositionInMeter(pos, letterPos) <= range
+            distanceBetweenTwoPositionInMeter(pos, letterPos) <= range && letter.isViewable
         }.map { Response(it) })
     }
 
+    @Transactional
     fun getLetter(id: Long, pos: Pair<Double, Double>): DetailResponse {
         val letter = letterRepository.findLetterById(id) ?: throw LetterNotFoundException(id)
+
+        updateViewable(letter)
+        if (!letter.isViewable) {
+            throw LetterViewableTimeExpiredException()
+        }
         val letterPos = letter.longitude to letter.latitude
         if (distanceBetweenTwoPositionInMeter(pos, letterPos) > CONCEDE)
             throw LetterNotCloseEnoughException()
         return DetailResponse(letter)
+    }
+
+    private fun updateViewable(letter: Letter) {
+        if (letter.viewableTime != null && letter.isViewable && ChronoUnit.HOURS.between(
+                letter.createdAt,
+                LocalDateTime.now()
+            ) >= letter.viewableTime
+        ) {
+            letter.isViewable = false
+        }
+    }
+
+    @Transactional
+    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul") // every 4AM
+    fun updateAllViewable() {
+        val letters = letterRepository.findAllByViewableTimeIsNotNullAndIsViewableTrue()
+        for (letter in letters) {
+            updateViewable(letter)
+        }
     }
 
     fun getMyLetters(userId: Long): ListResponse<Response> {
@@ -124,8 +152,8 @@ class LetterService(
         val letter = letterRepository.findLetterById(id) ?: throw LetterNotFoundException(id)
         if (letter.user.id != userId) throw LetterDeleteException()
 
-        letter.image ?.let { deleteFile(it) }
-        letter.voice ?.let { deleteFile(it) }
+        letter.image?.let { deleteFile(it) }
+        letter.voice?.let { deleteFile(it) }
 
         letterRepository.delete(letter)
     }
