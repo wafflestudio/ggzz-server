@@ -98,7 +98,9 @@ internal class LetterControllerTest {
                         fieldWithPath("summary").description("편지 요약"),
                         fieldWithPath("longitude").description("경도"),
                         fieldWithPath("latitude").description("위도"),
-                        fieldWithPath("text").description("편지 내용(글)").optional()
+                        fieldWithPath("text").description("편지 내용(글)").optional(),
+                        fieldWithPath("viewable_time").description("편지 공개 시간").optional(),
+                        fieldWithPath("view_range").description("편지 공개 범위").optional()
                     ),
                     responseFields(
                         fieldWithPath("id").description("API에 사용되는 편지 ID"),
