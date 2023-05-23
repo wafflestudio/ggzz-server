@@ -51,15 +51,10 @@ class LetterService(
     fun getLetters(pos: Pair<Double, Double>, range: Int): ListResponse<Response> {
         return ListResponse(letterRepository.findAll().filter { letter ->
             val letterPos = letter.longitude to letter.latitude
-<<<<<<< HEAD
             distanceBetweenTwoPositionInMeter(pos, letterPos) <= range && letter.isViewable()
-=======
-            distanceBetweenTwoPositionInMeter(pos, letterPos) <= range && letter.isViewable
->>>>>>> a25f676 ([FEATURE] 끄적 공개시간 설정 기능 추가)
         }.map { Response(it) })
     }
 
-    @Transactional
     fun getLetter(id: Long, pos: Pair<Double, Double>): DetailResponse {
         val letter = letterRepository.findLetterById(id) ?: throw LetterNotFoundException(id)
 
@@ -70,25 +65,6 @@ class LetterService(
         if (letter.viewRange != 0 && distanceBetweenTwoPositionInMeter(pos, letterPos) > letter.viewRange)
             throw LetterNotCloseEnoughException(letter.viewRange)
         return DetailResponse(letter)
-    }
-
-    private fun updateViewable(letter: Letter) {
-        if (letter.viewableTime != null && letter.isViewable && ChronoUnit.HOURS.between(
-                letter.createdAt,
-                LocalDateTime.now()
-            ) >= letter.viewableTime
-        ) {
-            letter.isViewable = false
-        }
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul") // every 4AM
-    fun updateAllViewable() {
-        val letters = letterRepository.findAllByViewableTimeIsNotNullAndIsViewableTrue()
-        for (letter in letters) {
-            updateViewable(letter)
-        }
     }
 
     fun getMyLetters(userId: Long): ListResponse<Response> {
