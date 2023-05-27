@@ -59,7 +59,6 @@ class LetterService(
     fun getLetter(id: Long, pos: Pair<Double, Double>): DetailResponse {
         val letter = letterRepository.findLetterById(id) ?: throw LetterNotFoundException(id)
 
-        updateViewable(letter)
         if (!letter.isViewable) {
             throw LetterViewableTimeExpiredException()
         }
@@ -69,7 +68,10 @@ class LetterService(
         return DetailResponse(letter)
     }
 
-    private fun updateViewable(letter: Letter) {
+    @Transactional
+    fun updateViewable(letterId: Long) {
+        val letter = letterRepository.findLetterById(letterId) ?: throw LetterNotFoundException(letterId)
+
         if (letter.viewableTime != 0 && letter.isViewable && ChronoUnit.HOURS.between(
                 letter.createdAt,
                 LocalDateTime.now()
@@ -84,7 +86,7 @@ class LetterService(
     fun updateAllViewable() {
         val letters = letterRepository.findAllByIsViewableTrueAndViewableTimeNot(0)
         for (letter in letters) {
-            updateViewable(letter)
+            updateViewable(letter.id)
         }
     }
 

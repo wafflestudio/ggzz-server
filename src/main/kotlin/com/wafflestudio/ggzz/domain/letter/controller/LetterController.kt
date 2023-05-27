@@ -37,8 +37,8 @@ class LetterController(
     @Operation(summary = "현재 위치 기준으로 편지 리스트 가져오기")
     @GetMapping
     fun getLetters(
-        @RequestParam @NotNull @Range(min=-180, max=180) longitude: Double?,
-        @RequestParam @NotNull @Range(min=-90, max=90) latitude: Double?,
+        @RequestParam @NotNull @Range(min = -180, max = 180) longitude: Double?,
+        @RequestParam @NotNull @Range(min = -90, max = 90) latitude: Double?,
         @RequestParam(required = false, defaultValue = "200") @Positive range: Int?,
     ): ResponseEntity<ListResponse<Response>> {
         logger.info("GET /api/v1/letters, longitude={}, latitude={}, range={}", longitude, latitude, range)
@@ -49,10 +49,11 @@ class LetterController(
     @GetMapping("/{id}")
     fun getLetter(
         @PathVariable id: Long,
-        @RequestParam @NotNull @Range(min=-180, max=180) longitude: Double?,
-        @RequestParam @NotNull @Range(min=-90, max=90) latitude: Double?,
+        @RequestParam @NotNull @Range(min = -180, max = 180) longitude: Double?,
+        @RequestParam @NotNull @Range(min = -90, max = 90) latitude: Double?,
     ): ResponseEntity<LetterDto.DetailResponse> {
         logger.info("GET /api/v1/letters/$id, longitude={}, latitude={}", longitude, latitude)
+        letterService.updateViewable(id)
         return ResponseEntity.ok(letterService.getLetter(id, longitude!! to latitude!!))
     }
 
@@ -75,13 +76,19 @@ class LetterController(
         @RequestPart image: MultipartFile?,
         @RequestPart voice: MultipartFile?,
     ): ResponseEntity<Any> {
-        logger.info("PUT /api/v1/letters/$id/source," +
-                " image-filename={}, image-type={}, voice-filename={}, voice-type={}",
-             image?.originalFilename, image?.contentType, voice?.originalFilename, voice?.contentType)
+        logger.info(
+            "PUT /api/v1/letters/$id/source," +
+                    " image-filename={}, image-type={}, voice-filename={}, voice-type={}",
+            image?.originalFilename, image?.contentType, voice?.originalFilename, voice?.contentType
+        )
         letterService.addSourceToLetter(userId, id, image, voice)
-        return ResponseEntity.ok(Gson().toJson(mapOf(
-            "image" to (image != null),
-            "voice" to (voice != null)
-        )))
+        return ResponseEntity.ok(
+            Gson().toJson(
+                mapOf(
+                    "image" to (image != null),
+                    "voice" to (voice != null)
+                )
+            )
+        )
     }
 }
