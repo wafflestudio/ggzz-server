@@ -7,4 +7,5 @@ interface UserRepository : JpaRepository<User, Long> {
     fun findMeById(id: Long): User
     fun existsByUsername(username: String): Boolean
     fun findByUsername(username: String): User?
+    fun findUserById(id: Long): User?
 }
