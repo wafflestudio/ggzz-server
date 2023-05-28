@@ -19,8 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.request.RequestDocumentation.parameterWithName
 import org.springframework.restdocs.request.RequestDocumentation.pathParameters
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
@@ -58,7 +57,7 @@ class LetterInteractionRestDocsTest(
                     letter.numberOfLikes = 1
 
                     mockMvc.perform(
-                        put("/api/v1/letters/{letter-id}/like", 1L)
+                        post("/api/v1/letters/{letter-id}/like", 1L)
                             .with(authentication(auth)).with(csrf())
                     ).andDo(document(
                         "letter-interaction/like",

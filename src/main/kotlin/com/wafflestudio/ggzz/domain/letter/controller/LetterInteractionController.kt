@@ -6,7 +6,7 @@ import com.wafflestudio.ggzz.domain.user.model.CurrentUser
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -16,7 +16,7 @@ class LetterInteractionController(
     private val letterInteractionService: LetterInteractionService
 ) {
 
-    @PutMapping("/{letter-id}/like")
+    @PostMapping("/{letter-id}/like")
     fun likeLetter(
         @CurrentUser userId: Long,
         @PathVariable("letter-id") letterId: Long
