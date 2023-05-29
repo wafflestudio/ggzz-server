@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
+import com.google.firebase.auth.FirebaseAuth
+import org.springframework.context.annotation.Bean
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
@@ -47,5 +49,10 @@ class FirebaseConfig {
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    @Bean
+    fun firebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance(FirebaseApp.getInstance())
     }
 }
