@@ -1,5 +1,6 @@
 package com.wafflestudio.ggzz.global.config
 
+import com.wafflestudio.ggzz.global.config.filter.FirebaseTokenFilter
 import com.wafflestudio.ggzz.global.error.CustomAccessDeniedHandler
 import com.wafflestudio.ggzz.global.error.CustomEntryPoint
 import org.springframework.context.annotation.Bean
@@ -11,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -23,24 +25,23 @@ class SecurityConfig(
 
     companion object {
         private val CORS_WHITELIST = listOf(
-            "https://wackathon-infp-client.vercel.app",
-            "http://localhost:3000"
+            "https://wackathon-infp-client.vercel.app", "http://localhost:3000"
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
-        private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/**")
-        private val POST_WHITELIST = arrayOf("/api/v1/verifyToken", "/signup", "/login", "/logout")
+        private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
+        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout")
     }
 
     @Bean
     fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
-        return httpSecurity
-            .httpBasic().disable()
+        return httpSecurity.httpBasic().disable()
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .csrf().disable()
             .logout().disable()
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
             .and()
+            .addFilterBefore(firebaseTokenFilter(), UsernamePasswordAuthenticationFilter::class.java)
             .exceptionHandling()
             .authenticationEntryPoint(customEntryPoint)
             .accessDeniedHandler(customAccessDeniedHandler)
@@ -69,6 +70,9 @@ class SecurityConfig(
         return source
     }
 
+    fun firebaseTokenFilter(): FirebaseTokenFilter {
+        return FirebaseTokenFilter()
+    }
 
     @Bean
     fun passwordEncoder(): PasswordEncoder {
