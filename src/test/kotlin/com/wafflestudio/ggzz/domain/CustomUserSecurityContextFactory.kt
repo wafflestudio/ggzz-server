@@ -9,9 +9,9 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 
 class CustomUserSecurityContextFactory : WithSecurityContextFactory<WithCustomUser> {
     override fun createSecurityContext(customUserAnnotation: WithCustomUser): SecurityContext {
-        val user = User(customUserAnnotation.username, customUserAnnotation.nickname, customUserAnnotation.password)
+        val user = User("firebaseId", customUserAnnotation.username, customUserAnnotation.nickname, customUserAnnotation.password)
         val userPrincipal = UserPrincipal(user)
-        val userToken = UserToken(userPrincipal)
+        val userToken = UserToken(userPrincipal, "firebaseId")
 
         val context = SecurityContextHolder.createEmptyContext()
         context.authentication = userToken
