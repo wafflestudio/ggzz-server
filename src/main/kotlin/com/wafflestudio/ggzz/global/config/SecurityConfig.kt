@@ -25,7 +25,8 @@ class SecurityConfig(
 
     companion object {
         private val CORS_WHITELIST = listOf(
-            "https://wackathon-infp-client.vercel.app", "http://localhost:3000"
+            "https://wackathon-infp-client.vercel.app",
+            "http://localhost:3000"
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
@@ -34,7 +35,8 @@ class SecurityConfig(
 
     @Bean
     fun securityFilterChain(httpSecurity: HttpSecurity): SecurityFilterChain {
-        return httpSecurity.httpBasic().disable()
+        return httpSecurity
+            .httpBasic().disable()
             .cors().configurationSource(corsConfigurationSource())
             .and()
             .csrf().disable()

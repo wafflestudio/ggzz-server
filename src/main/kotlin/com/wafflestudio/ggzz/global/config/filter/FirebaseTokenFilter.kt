@@ -46,7 +46,8 @@ class FirebaseTokenFilter : OncePerRequestFilter() {
             val firebaseAuth = FirebaseAuth.getInstance()
             return firebaseAuth.verifyIdToken(token)
         } catch (e: Exception) {
-            return null
+            println(e.message)
+            throw IllegalStateException("The Given FirebaseToken is wrong.")
         }
     }
 
