@@ -29,6 +29,6 @@ class Letter(
         image = null,
         voice = null,
     ) {
-        user.letters.add(this)
+        user.letters?.add(this)
     }
 }
