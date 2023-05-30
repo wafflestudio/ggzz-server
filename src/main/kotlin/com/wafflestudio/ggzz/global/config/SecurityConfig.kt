@@ -1,5 +1,6 @@
 package com.wafflestudio.ggzz.global.config
 
+import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
 import com.wafflestudio.ggzz.global.error.CustomAccessDeniedHandler
 import com.wafflestudio.ggzz.global.error.CustomEntryPoint
 import org.springframework.context.annotation.Bean
@@ -11,6 +12,7 @@ import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
@@ -19,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 class SecurityConfig(
     private val customEntryPoint: CustomEntryPoint,
     private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
 
     companion object {
@@ -28,7 +31,7 @@ class SecurityConfig(
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/**")
-        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout")
+        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout", "/refresh")
     }
 
     @Bean
@@ -49,9 +52,9 @@ class SecurityConfig(
             .requestMatchers(HttpMethod.GET, *SWAGGER).permitAll()
             .requestMatchers(HttpMethod.GET, *GET_WHITELIST).permitAll()
             .requestMatchers(HttpMethod.POST, *POST_WHITELIST).permitAll()
-            .requestMatchers("/api/v1/**").authenticated()
-            .requestMatchers(HttpMethod.GET, "/login").authenticated()
+            .anyRequest().authenticated()
             .and()
+            .addFilterBefore(JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter::class.java)
             .build()
     }
 
