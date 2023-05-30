@@ -16,3 +16,9 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+auth.jwt:
+  issuer: GGZZ
+  jwtSecret: WAFFLE_STUDIO_GGZZ_JSON_WEB_TOKEN_SECRET_KEY
+  jwtExpiration: 7200
+  refreshExpiration: 172800

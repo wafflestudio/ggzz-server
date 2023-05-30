@@ -58,6 +58,11 @@ spring:
 
 secrets-manager: dev/ggzz-server
 
+auth.jwt:
+  issuer: ${jwt-issuer}
+  jwtSecret: ${jwt-secret-key}
+  jwtExpiration: 7200
+  refreshExpiration: 172800
 ---
 
 spring:
@@ -75,3 +80,9 @@ spring:
     password: INFP_admin_01
 
 secrets-manager: dev/ggzz-server
+
+auth.jwt:
+  issuer: GGZZ
+  jwtSecret: WAFFLE_STUDIO_GGZZ_JSON_WEB_TOKEN_SECRET_KEY
+  jwtExpiration: 7200
+  refreshExpiration: 172800
