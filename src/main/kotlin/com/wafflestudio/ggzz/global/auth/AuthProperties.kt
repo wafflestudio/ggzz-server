@@ -1,4 +1,4 @@
-package com.wafflestudio.ggzz.domain.user.service
+package com.wafflestudio.ggzz.global.auth
 
 import org.springframework.boot.context.properties.ConfigurationProperties
 
