@@ -2,6 +2,7 @@ package com.wafflestudio.ggzz.global.config
 
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.config.filter.FirebaseTokenFilter
+import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
 import com.wafflestudio.ggzz.global.error.CustomAccessDeniedHandler
 import com.wafflestudio.ggzz.global.error.CustomEntryPoint
 import org.springframework.context.annotation.Bean
@@ -24,6 +25,7 @@ class SecurityConfig(
     private val userRepository: UserRepository,
     private val customEntryPoint: CustomEntryPoint,
     private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
 
     companion object {
@@ -33,7 +35,7 @@ class SecurityConfig(
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
-        private val POST_WHITELIST = arrayOf("/signup", "/logout")
+        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout", "/refresh")
     }
 
     @Bean
@@ -58,6 +60,7 @@ class SecurityConfig(
             .requestMatchers("/api/v1/**").authenticated()
             .requestMatchers(HttpMethod.GET, "/login").authenticated()
             .and()
+            .addFilterBefore(JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter::class.java)
             .build()
     }
 
