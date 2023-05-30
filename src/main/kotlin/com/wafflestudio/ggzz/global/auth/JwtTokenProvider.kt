@@ -1,27 +1,30 @@
-package com.wafflestudio.ggzz.domain.user.service
+package com.wafflestudio.ggzz.global.auth
 
 import com.wafflestudio.ggzz.global.error.InvalidTokenException
+import com.wafflestudio.ggzz.global.error.NoTokenException
 import com.wafflestudio.ggzz.global.error.TokenExpiredException
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.ExpiredJwtException
-import io.jsonwebtoken.Jws
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
-import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import io.jsonwebtoken.security.Keys
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseCookie
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
-@Service
-@Transactional(readOnly = true)
+@Component
 @ConfigurationPropertiesScan
-class AuthTokenService (
+class JwtTokenProvider (
     private val authProperties: AuthProperties,
-){
+    private val userDetailsService: UserDetailsService,
+    ){
     private val tokenPrefix = "Bearer "
     private val signingKey = Keys.hmacShaKeyFor(authProperties.jwtSecret.toByteArray())
 
@@ -48,7 +51,7 @@ class AuthTokenService (
 
     fun getUsernameFromToken(authToken: String, type: Type): String {
         return try {
-            parse(authToken).body["username"] as String
+            getAllClaims(authToken)["username"] as String
         } catch (e: ExpiredJwtException) {
             throw TokenExpiredException(type.toString().lowercase())
         } catch (e: Exception) {
@@ -56,13 +59,14 @@ class AuthTokenService (
         }
     }
 
-    private fun parse(authToken: String): Jws<Claims> {
+    private fun getAllClaims(authToken: String): Claims {
         val prefixRemoved = authToken.replace(tokenPrefix, "").trim { it <= ' ' }
         return Jwts
             .parserBuilder()
             .setSigningKey(signingKey)
             .build()
             .parseClaimsJws(prefixRemoved)
+            .body
     }
 
     fun generateResponseCookie(token: String): ResponseCookie {
@@ -73,6 +77,27 @@ class AuthTokenService (
             .path("/")
             .maxAge(authProperties.jwtExpiration)
             .build()
+    }
+
+    fun resolveToken(request: HttpServletRequest): String {
+        return request.getHeader("Authorization") ?: throw NoTokenException(Type.ACCESS.toString().lowercase())
+    }
+
+    fun validateToken(authToken: String): Boolean {
+        try {
+            return getAllClaims(authToken).expiration.before(Date())
+        } catch (e: ExpiredJwtException) {
+            throw TokenExpiredException(Type.ACCESS.toString().lowercase())
+        } catch (e: Exception) {
+            throw InvalidTokenException(Type.ACCESS.toString().lowercase())
+        }
+    }
+
+    fun getAuthentication(authToken: String): Authentication {
+        val username = getUsernameFromToken(authToken, Type.ACCESS)
+        val userDetails = userDetailsService.loadUserByUsername(username)
+
+        return UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
     }
 }
 
