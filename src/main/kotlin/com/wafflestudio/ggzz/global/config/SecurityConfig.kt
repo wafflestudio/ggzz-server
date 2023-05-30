@@ -10,6 +10,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.builders.WebSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -20,6 +23,7 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
+@EnableWebSecurity
 class SecurityConfig(
     private val firebaseConfig: FirebaseConfig,
     private val userRepository: UserRepository,
@@ -36,6 +40,17 @@ class SecurityConfig(
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
         private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout", "/refresh")
+    }
+
+
+    @Bean
+    fun ignoringCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer { web: WebSecurity ->
+            web.ignoring()
+                .requestMatchers(HttpMethod.GET, *SWAGGER)
+                .requestMatchers(HttpMethod.GET, *GET_WHITELIST)
+                .requestMatchers(HttpMethod.POST, *POST_WHITELIST)
+        }
     }
 
     @Bean
