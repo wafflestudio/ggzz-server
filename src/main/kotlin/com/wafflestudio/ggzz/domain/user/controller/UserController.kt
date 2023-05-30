@@ -6,6 +6,7 @@ import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.domain.user.model.CurrentUser
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.servlet.http.Cookie
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
@@ -52,8 +53,8 @@ class UserController(
 
     @Operation(summary = "accessToken 재발급")
     @PostMapping("/refresh")
-    fun refresh(@CookieValue(value = "refreshToken") refreshToken: String): ResponseEntity<AuthToken> {
+    fun refresh(@CookieValue(value = "refreshToken", required = false) cookie: Cookie): ResponseEntity<AuthToken> {
         logger.info("POST /refresh")
-        return userService.refresh(refreshToken)
+        return userService.refresh(cookie)
     }
 }

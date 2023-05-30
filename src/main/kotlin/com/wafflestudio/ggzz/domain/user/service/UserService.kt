@@ -7,8 +7,11 @@ import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
 import com.wafflestudio.ggzz.domain.user.exception.LoginFailedException
 import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
+import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
+import com.wafflestudio.ggzz.global.auth.Type
 import com.wafflestudio.ggzz.global.error.InvalidTokenException
 import com.wafflestudio.ggzz.global.error.NotLoggedInException
+import jakarta.servlet.http.Cookie
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -22,7 +25,7 @@ import org.springframework.http.ResponseCookie
 class UserService(
     private val userRepository: UserRepository,
     private val passwordEncoder: PasswordEncoder,
-    private val authTokenService: AuthTokenService,
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
     @Transactional
     fun signup(request: SignUpRequest) {
@@ -39,11 +42,11 @@ class UserService(
 
         if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
 
-        val accessToken = authTokenService.generateTokenByUsername(request.username, Type.ACCESS)
-        val refreshToken = authTokenService.generateTokenByUsername(request.username, Type.REFRESH)
+        val accessToken = jwtTokenProvider.generateTokenByUsername(request.username, Type.ACCESS)
+        val refreshToken = jwtTokenProvider.generateTokenByUsername(request.username, Type.REFRESH)
         user.refreshToken = refreshToken
         return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(refreshToken).toString())
+            .header(HttpHeaders.SET_COOKIE, jwtTokenProvider.generateResponseCookie(refreshToken).toString())
             .body(AuthToken(accessToken))
     }
 
@@ -64,17 +67,18 @@ class UserService(
     }
 
     @Transactional
-    fun refresh(refreshToken: String): ResponseEntity<AuthToken> {
-        val username = authTokenService.getUsernameFromToken(refreshToken, Type.REFRESH)
+    fun refresh(cookie: Cookie): ResponseEntity<AuthToken> {
+        val refreshToken = cookie.value
+        val username = jwtTokenProvider.getUsernameFromToken(refreshToken, Type.REFRESH)
         val user = userRepository.findByUsername(username) ?: throw InvalidTokenException("Refresh")
         user.refreshToken ?: throw NotLoggedInException()
         if (refreshToken != user.refreshToken) throw InvalidTokenException("Refresh")
 
-        val accessToken = authTokenService.generateTokenByUsername(username, Type.ACCESS)
-        val newRefreshToken = authTokenService.generateTokenByUsername(username, Type.REFRESH)
+        val accessToken = jwtTokenProvider.generateTokenByUsername(username, Type.ACCESS)
+        val newRefreshToken = jwtTokenProvider.generateTokenByUsername(username, Type.REFRESH)
         user.refreshToken = newRefreshToken
         return ResponseEntity.ok()
-            .header(HttpHeaders.SET_COOKIE, authTokenService.generateResponseCookie(newRefreshToken).toString())
+            .header(HttpHeaders.SET_COOKIE, jwtTokenProvider.generateResponseCookie(newRefreshToken).toString())
             .body(AuthToken(accessToken))
     }
 }
