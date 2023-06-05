@@ -6,19 +6,20 @@ import com.google.auth.oauth2.GoogleCredentials
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
-import org.springframework.context.annotation.Bean
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 import java.io.ByteArrayInputStream
-import javax.annotation.PostConstruct
 
-@Component
-class FirebaseConfig {
+interface FirebaseConfig {
+    fun verifyId(id: String): String
+    fun getIdByToken(token: String): String
+}
 
-    @PostConstruct
-    fun initialize() {
+@Service
+class FirebaseConfigImpl : FirebaseConfig {
+    private val firebaseAuth: FirebaseAuth by lazy {
         try {
             // AWS Secrets Manager에 접근하기 위한 클라이언트 생성
             val secretsManager = SecretsManagerClient.builder()
@@ -38,21 +39,23 @@ class FirebaseConfig {
             val googleServicesJsonString = secrets["google-services.json"] as? String
                 ?: throw IllegalStateException("google-services.json not found in secrets")
 
-            val googleCredentials = GoogleCredentials.fromStream(ByteArrayInputStream(googleServicesJsonString.toByteArray()))
+            val googleCredentials =
+                GoogleCredentials.fromStream(ByteArrayInputStream(googleServicesJsonString.toByteArray()))
 
             val options = FirebaseOptions.builder()
                 .setCredentials(googleCredentials)
                 .build()
 
             FirebaseApp.initializeApp(options)
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
+        FirebaseAuth.getInstance()
     }
 
-    @Bean
-    fun firebaseAuth(): FirebaseAuth {
-        return FirebaseAuth.getInstance(FirebaseApp.getInstance())
-    }
+    override fun verifyId(id: String): String =
+        firebaseAuth.getUser(id).uid
+
+    override fun getIdByToken(token: String): String =
+        firebaseAuth.verifyIdToken(token).uid
 }

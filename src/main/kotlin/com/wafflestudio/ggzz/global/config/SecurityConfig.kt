@@ -19,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
 class SecurityConfig(
+    private val firebaseConfig: FirebaseConfig,
     private val customEntryPoint: CustomEntryPoint,
     private val customAccessDeniedHandler: CustomAccessDeniedHandler,
 ) {
@@ -30,7 +31,7 @@ class SecurityConfig(
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
-        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout")
+        private val POST_WHITELIST = arrayOf("/signup", "/logout")
     }
 
     @Bean
@@ -73,7 +74,7 @@ class SecurityConfig(
     }
 
     fun firebaseTokenFilter(): FirebaseTokenFilter {
-        return FirebaseTokenFilter()
+        return FirebaseTokenFilter(firebaseConfig)
     }
 
     @Bean

@@ -1,33 +1,57 @@
 package com.wafflestudio.ggzz.domain.user.service
 
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
+import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.exception.BadRequestException
 import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
-import com.wafflestudio.ggzz.domain.user.exception.LoginFailedException
+import com.wafflestudio.ggzz.domain.user.exception.UserNotFoundException
+import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
+import com.wafflestudio.ggzz.global.config.FirebaseConfig
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+
+interface UserService {
+    fun updateOrCreate(request: UserDto.SignUpRequest): User
+    fun update(firebaseToken: String): User
+}
 
 @Service
-@Transactional(readOnly = true)
-class UserService(
+internal class UserServiceImpl(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder,
-) {
-    @Transactional
-    fun signup(firebaseId: String, request: SignUpRequest) {
-        if (userRepository.existsByUsername(request.username!!)) throw DuplicateUsernameException(request.username)
+    private val firebaseConfig: FirebaseConfig,
+    private val passwordEncoder: PasswordEncoder
+) : UserService {
+    override fun updateOrCreate(request: UserDto.SignUpRequest): User {
+        val username = request.username ?: throw BadRequestException()
+        val nickname = request.nickname ?: throw BadRequestException()
+        val password = request.password ?: throw BadRequestException()
 
-        val existingUser = userRepository.findByFirebaseId(firebaseId)
-        val updatedUser = existingUser.copy(username = request.username, nickname = request.nickname!!)
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication != null && authentication.isAuthenticated) {
+            var user = authentication.principal as User
+            user = getUser(user.firebaseId)
 
-        userRepository.save(updatedUser)
+            if (user.username != username && userRepository.existsByUsername(username)) {
+                throw DuplicateUsernameException(username)
+            }
+            user.username = username
+            user.nickname = nickname
+            user.password = passwordEncoder.encode(password)
+            return userRepository.save(user)
+        } else {
+            throw UserNotFoundException()
+        }
     }
 
-    fun login(request: LoginRequest) {
-        val user = userRepository.findByUsername(request.username!!) ?: throw LoginFailedException()
+    override fun update(firebaseToken: String): User {
+        TODO("Not yet implemented")
+    }
 
-        if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
+    private fun getUser(firebaseId: String): User {
+        val firebaseId = runCatching { firebaseConfig.verifyId(firebaseId) }
+            .getOrElse { throw UserNotFoundException() }
+
+        return userRepository.findByFirebaseId(firebaseId)
     }
 }

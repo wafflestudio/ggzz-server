@@ -1,33 +1,27 @@
 package com.wafflestudio.ggzz.global.config.filter
 
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseToken
 import com.wafflestudio.ggzz.domain.user.model.User
-import com.wafflestudio.ggzz.domain.user.repository.UserRepository
+import com.wafflestudio.ggzz.global.config.FirebaseConfig
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
-class FirebaseTokenFilter : OncePerRequestFilter() {
-    @Autowired
-    private lateinit var userRepository: UserRepository
-
+class FirebaseTokenFilter(
+    private val firebaseConfig: FirebaseConfig
+) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain
     ) {
         val token = extractTokenFromRequest(request)
 
         if (token != null) {
-            val firebaseToken = validateToken(token)
-            val authentication = firebaseToken?.let { createAuthentication(it) }
+            val authentication = createAuthentication(token)
             SecurityContextHolder.getContext().authentication = authentication
         }
 
@@ -41,21 +35,9 @@ class FirebaseTokenFilter : OncePerRequestFilter() {
         } else null
     }
 
-    private fun validateToken(token: String): FirebaseToken? {
-        try {
-            val firebaseAuth = FirebaseAuth.getInstance()
-            return firebaseAuth.verifyIdToken(token)
-        } catch (e: Exception) {
-            println(e.message)
-            throw IllegalStateException("The Given FirebaseToken is wrong.")
-        }
-    }
-
-    private fun createAuthentication(decodedToken: FirebaseToken): Authentication {
-        val userId = decodedToken.uid
-        val user = User(firebaseId = userId)
-        val savedUser = userRepository.save(user)
-
-        return UsernamePasswordAuthenticationToken(savedUser, null, user.getAuthorities())
+    private fun createAuthentication(token: String): Authentication {
+        val firebaseId = firebaseConfig.getIdByToken(token)
+        val authenticatedUser = User(firebaseId)
+        return UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities())
     }
 }
