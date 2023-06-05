@@ -5,16 +5,15 @@ import com.wafflestudio.ggzz.domain.letter.model.Letter
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.global.common.model.BaseTimeTraceEntity
 import jakarta.persistence.*
-import org.springframework.data.annotation.Id
 import org.springframework.security.core.GrantedAuthority
 
 @Entity
 data class User(
-    @Id val firebaseId: String,
     @Column(unique = true)
-    val username: String?,
-    val nickname: String?,
-    val password: String?,
+    val firebaseId: String,
+    var username: String?,
+    var nickname: String?,
+    var password: String?,
     @ElementCollection(targetClass = UserRole::class)
     @Enumerated(EnumType.STRING)
     val roles: Set<UserRole> = setOf(UserRole.USER), // 서버 단에서 수동으로 USER -> ADMIN 변경

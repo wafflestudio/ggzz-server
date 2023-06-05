@@ -1,16 +1,12 @@
 package com.wafflestudio.ggzz.domain.user.controller
 
 import com.wafflestudio.ggzz.domain.user.dto.UserDto
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
-import com.wafflestudio.ggzz.domain.user.model.UserToken
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.Authentication
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -23,26 +19,12 @@ class UserController(
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    fun signup(@RequestBody @Valid request: SignUpRequest, authentication: Authentication): ResponseEntity<Any> {
+    fun signup(@RequestBody @Valid request: UserDto.SignUpRequest): ResponseEntity<UserDto.UserResponse> {
         logger.info("POST /signup")
-        val firebaseId = (authentication as UserToken).getFirebaseId()
-        userService.signup(firebaseId, request)
-        return ResponseEntity.ok().build()
-    }
+        val user = userService.updateOrCreate(request)
+        val userResponse = UserDto.UserResponse.fromEntity(user)
 
-    @Operation(summary = "로그인")
-    @PostMapping("/login")
-    fun login(@RequestBody @Valid request: UserDto.LoginRequest): ResponseEntity<Any> {
-        logger.info("POST /login")
-        userService.login(request)
-        return ResponseEntity.ok().build()
-    }
-
-    @Operation(summary = "로그인 확인 용도")
-    @GetMapping("/login")
-    fun isLoggedIn(): ResponseEntity<Any> {
-        logger.info("GET /login")
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok(userResponse)
     }
 
     @Operation(summary = "로그아웃: JSESSIONID 쿠키 삭제 용도")
