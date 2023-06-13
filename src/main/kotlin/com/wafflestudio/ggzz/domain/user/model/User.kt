@@ -14,10 +14,10 @@ data class User(
     var username: String?,
     var nickname: String?,
     var password: String?,
-    @ElementCollection(targetClass = UserRole::class)
+    @ElementCollection(targetClass = UserRole::class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     val roles: Set<UserRole> = setOf(UserRole.USER), // 서버 단에서 수동으로 USER -> ADMIN 변경
-    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL])
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
     val letters: MutableList<Letter>? = mutableListOf(),
 ) : BaseTimeTraceEntity() {
     constructor(firebaseId: String, request: SignUpRequest?, encodedPassword: String?) : this(

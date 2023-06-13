@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service
 
 interface UserService {
     fun updateOrCreate(request: UserDto.SignUpRequest): User
-    fun update(firebaseToken: String): User
 }
 
 @Service
@@ -29,8 +28,7 @@ internal class UserServiceImpl(
 
         val authentication = SecurityContextHolder.getContext().authentication
         if (authentication != null && authentication.isAuthenticated) {
-            var user = authentication.principal as User
-            user = getUser(user.firebaseId)
+            val user = authentication.principal as User
 
             if (user.username != username && userRepository.existsByUsername(username)) {
                 throw DuplicateUsernameException(username)
@@ -42,10 +40,6 @@ internal class UserServiceImpl(
         } else {
             throw UserNotFoundException()
         }
-    }
-
-    override fun update(firebaseToken: String): User {
-        TODO("Not yet implemented")
     }
 
     private fun getUser(firebaseId: String): User {

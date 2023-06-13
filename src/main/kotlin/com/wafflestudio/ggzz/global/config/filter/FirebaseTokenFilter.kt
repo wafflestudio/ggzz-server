@@ -1,6 +1,7 @@
 package com.wafflestudio.ggzz.global.config.filter
 
 import com.wafflestudio.ggzz.domain.user.model.User
+import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.config.FirebaseConfig
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -13,7 +14,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class FirebaseTokenFilter(
-    private val firebaseConfig: FirebaseConfig
+    private val firebaseConfig: FirebaseConfig,
+    private val userRepository: UserRepository
 ) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain
@@ -37,7 +39,12 @@ class FirebaseTokenFilter(
 
     private fun createAuthentication(token: String): Authentication {
         val firebaseId = firebaseConfig.getIdByToken(token)
-        val authenticatedUser = User(firebaseId)
+        val authenticatedUser: User = if (userRepository.existsByFirebaseId(firebaseId)) {
+            userRepository.findByFirebaseId(firebaseId)
+        } else {
+            User(firebaseId)
+        }
+
         return UsernamePasswordAuthenticationToken(authenticatedUser, null, authenticatedUser.getAuthorities())
     }
 }

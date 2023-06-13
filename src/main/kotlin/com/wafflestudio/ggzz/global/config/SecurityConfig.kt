@@ -1,5 +1,6 @@
 package com.wafflestudio.ggzz.global.config
 
+import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.config.filter.FirebaseTokenFilter
 import com.wafflestudio.ggzz.global.error.CustomAccessDeniedHandler
 import com.wafflestudio.ggzz.global.error.CustomEntryPoint
@@ -20,6 +21,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 class SecurityConfig(
     private val firebaseConfig: FirebaseConfig,
+    private val userRepository: UserRepository,
     private val customEntryPoint: CustomEntryPoint,
     private val customAccessDeniedHandler: CustomAccessDeniedHandler,
 ) {
@@ -74,7 +76,7 @@ class SecurityConfig(
     }
 
     fun firebaseTokenFilter(): FirebaseTokenFilter {
-        return FirebaseTokenFilter(firebaseConfig)
+        return FirebaseTokenFilter(firebaseConfig, userRepository)
     }
 
     @Bean
