@@ -74,7 +74,7 @@ class LetterControllerTest @Autowired constructor(
     }
 
     @Test
-    fun getLetters() {
+    fun getLettersTest() {
         // given
         setupTestEnvironment() // Authentication 설정
         val letters = mutableListOf<LetterDto.Response>()
@@ -104,7 +104,7 @@ class LetterControllerTest @Autowired constructor(
     }
 
     @Test
-    fun getLetter() {
+    fun getLetterTest() {
         // given
         setupTestEnvironment() // Authentication 설정
         val response = LetterDto.DetailResponse(
@@ -141,7 +141,7 @@ class LetterControllerTest @Autowired constructor(
     }
 
     @Test
-    fun deleteLetter() {
+    fun deleteLetterTest() {
         // given
         setupTestEnvironment() // Authentication 설정
 
@@ -158,7 +158,7 @@ class LetterControllerTest @Autowired constructor(
     }
 
     @Test
-    fun putResource() {
+    fun putResourceTest() {
         // given
         setupTestEnvironment() // Authentication 설정
         val imageContent = ByteArray(100)

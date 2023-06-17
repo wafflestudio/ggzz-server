@@ -6,7 +6,6 @@ import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
 import com.wafflestudio.ggzz.domain.user.exception.UserNotFoundException
 import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
-import com.wafflestudio.ggzz.global.config.FirebaseConfig
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
@@ -18,7 +17,6 @@ interface UserService {
 @Service
 internal class UserServiceImpl(
     private val userRepository: UserRepository,
-    private val firebaseConfig: FirebaseConfig,
     private val passwordEncoder: PasswordEncoder
 ) : UserService {
     override fun updateOrCreate(request: UserDto.SignUpRequest): User {
@@ -40,12 +38,5 @@ internal class UserServiceImpl(
         } else {
             throw UserNotFoundException()
         }
-    }
-
-    private fun getUser(firebaseId: String): User {
-        val firebaseId = runCatching { firebaseConfig.verifyId(firebaseId) }
-            .getOrElse { throw UserNotFoundException() }
-
-        return userRepository.findByFirebaseId(firebaseId)
     }
 }

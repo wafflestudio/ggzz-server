@@ -9,5 +9,4 @@ interface UserRepository : JpaRepository<User, Long> {
 
     fun existsByFirebaseId(firebaseId: String): Boolean
     fun existsByUsername(username: String): Boolean
-    fun findByUsername(username: String): User?
 }
