@@ -35,7 +35,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDateTime
 import org.springframework.security.core.userdetails.User as SecurityUser
 
-@ExtendWith(SpringExtension::class)
+//@ExtendWith(RestDocumentationExtension::class)
 @WebMvcTest(LetterController::class)
 @AutoConfigureMockMvc
 class LetterControllerTest @Autowired constructor(
@@ -69,7 +69,7 @@ class LetterControllerTest @Autowired constructor(
         )
 
         // then
-        result.andExpect(status().isOk).andReturn()
+        result.andExpect(status().isOk)
         SecurityContextHolder.clearContext() // 인증 정보 제거
     }
 
