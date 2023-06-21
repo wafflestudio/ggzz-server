@@ -63,3 +63,5 @@ spring:
     url: jdbc:mysql://localhost:3306/infp_db
     username: infp
     password: INFP_admin_01
+
+secrets-manager: dev/ggzz-server

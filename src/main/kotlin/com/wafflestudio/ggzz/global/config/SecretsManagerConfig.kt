@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 
 @Configuration
-@Profile("dev")
+@Profile("dev", "local")
 class SecretsManagerConfig : EnvironmentAware, BeanFactoryPostProcessor {
     private lateinit var env: Environment
 
