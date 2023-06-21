@@ -2,6 +2,7 @@ package com.wafflestudio.ggzz.domain.letter.service
 
 
 import com.amazonaws.services.s3.AmazonS3
+import com.wafflestudio.ggzz.domain.letter.exception.LetterNotCloseEnoughException
 import com.wafflestudio.ggzz.domain.letter.exception.LetterViewableTimeExpiredException
 import com.wafflestudio.ggzz.domain.letter.model.Letter
 import com.wafflestudio.ggzz.domain.letter.repository.LetterRepository
@@ -11,11 +12,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.IsolationMode
 import io.kotest.core.spec.style.BehaviorSpec
 import io.kotest.matchers.ints.shouldBeExactly
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import io.mockk.every
 import io.mockk.mockk
-import java.time.LocalDateTime
 
 
 internal class LetterServiceTest : BehaviorSpec({
@@ -42,7 +41,7 @@ internal class LetterServiceTest : BehaviorSpec({
             text = null,
             image = null,
             voice = null,
-            isViewable = true
+            viewableTime = 0 // 공개 시간 무제한
         )
 
         val unViewableLetter = Letter(
@@ -54,7 +53,7 @@ internal class LetterServiceTest : BehaviorSpec({
             text = null,
             image = null,
             voice = null,
-            isViewable = false
+            viewableTime = -1 // 공개 시간 X
         )
 
         every { letterRepository.findAll() } returns listOf(viewableLetter, unViewableLetter)
@@ -83,54 +82,48 @@ internal class LetterServiceTest : BehaviorSpec({
         }
     }
 
-    given("생성된지 오래된 isViewable 가 true 인 끄적이 있을때") {
+    given("공개 범위보다 가까운 끄적과 먼 끄적이 있을때") {
         val user = User(
             username = "Simon",
             nickname = "paul",
             password = "password"
         )
-        val oldLetter = Letter(
+        val nearLetter = Letter(
             user = user,
-            title = "old",
+            title = "near",
             summary = "summary",
             longitude = 127.0,
             latitude = 37.0,
             text = null,
             image = null,
             voice = null,
-            isViewable = true,
-            viewableTime = 24
+            viewRange = 0 // 공개범위 무제한
         )
-        val noLimitLetter = Letter(
+
+        val farLetter = Letter(
             user = user,
-            title = "viewable",
+            title = "far",
             summary = "summary",
             longitude = 127.0,
             latitude = 37.0,
             text = null,
             image = null,
             voice = null,
-            isViewable = true,
-            viewableTime = 0
+            viewRange = 1 // 공개범위 1m
         )
-        oldLetter.createdAt = LocalDateTime.MIN
-        noLimitLetter.createdAt = LocalDateTime.MIN
 
-        every { letterRepository.findLetterById(any()) } returns oldLetter
-        every { letterRepository.findAllByIsViewableTrueAndViewableTimeNot(0) } returns listOf(oldLetter, noLimitLetter)
+        every { letterRepository.findLetterById(1) } returns nearLetter
+        every { letterRepository.findLetterById(2) } returns farLetter
 
-        `when`("정해진 끄적을 업데이트하면") {
-            letterService.updateViewable(1)
-            then("isViewable 필드가 false 로 업데이트 된다") {
-                oldLetter.isViewable shouldBe false
+        `when`("가까운 끄적 조회하면") {
+            val letter = letterService.getLetter(1, Pair(0.0, 0.0))
+            then("정상적으로 조회한다") {
+                letter.title shouldMatch "near"
             }
         }
-
-        `when`("모든 끄적을 업데이트 하면") {
-            letterService.updateAllViewable()
-            then("공개 시간이 무제한이 아닌 끄적의 isViewable 필드만 업데이트 된다") {
-                oldLetter.isViewable shouldBe false
-                noLimitLetter.isViewable shouldBe true
+        `when`("먼 끄적 조회하면") {
+            then("LetterNotCloseEnoughException 을 던진다") {
+                shouldThrow<LetterNotCloseEnoughException> { letterService.getLetter(2, Pair(0.0, 0.0)) }
             }
         }
     }
