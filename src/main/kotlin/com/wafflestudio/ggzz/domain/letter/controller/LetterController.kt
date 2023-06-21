@@ -53,7 +53,6 @@ class LetterController(
         @RequestParam @NotNull @Range(min = -90, max = 90) latitude: Double?,
     ): ResponseEntity<LetterDto.DetailResponse> {
         logger.info("GET /api/v1/letters/$id, longitude={}, latitude={}", longitude, latitude)
-        letterService.updateViewable(id)
         return ResponseEntity.ok(letterService.getLetter(id, longitude!! to latitude!!))
     }
 

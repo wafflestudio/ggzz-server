@@ -6,6 +6,8 @@ import com.wafflestudio.ggzz.global.common.model.BaseTimeTraceEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ManyToOne
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 @Entity
 class Letter(
@@ -18,7 +20,6 @@ class Letter(
     var text: String?,
     var image: String?,
     var voice: String?,
-    var isViewable: Boolean = true,
     val viewableTime: Int = 0,
     val viewRange: Int = 0
 ) : BaseTimeTraceEntity() {
@@ -35,5 +36,12 @@ class Letter(
         viewRange = request.viewRange!!
     ) {
         user.letters.add(this)
+    }
+
+    fun isViewable(): Boolean {
+        return this.viewableTime == 0 || ChronoUnit.HOURS.between(
+            this.createdAt,
+            LocalDateTime.now()
+        ) <= this.viewableTime
     }
 }

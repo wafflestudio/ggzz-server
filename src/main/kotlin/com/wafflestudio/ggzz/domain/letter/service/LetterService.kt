@@ -51,43 +51,20 @@ class LetterService(
     fun getLetters(pos: Pair<Double, Double>, range: Int): ListResponse<Response> {
         return ListResponse(letterRepository.findAll().filter { letter ->
             val letterPos = letter.longitude to letter.latitude
-            distanceBetweenTwoPositionInMeter(pos, letterPos) <= range && letter.isViewable
+            distanceBetweenTwoPositionInMeter(pos, letterPos) <= range && letter.isViewable()
         }.map { Response(it) })
     }
 
-    @Transactional
     fun getLetter(id: Long, pos: Pair<Double, Double>): DetailResponse {
         val letter = letterRepository.findLetterById(id) ?: throw LetterNotFoundException(id)
 
-        if (!letter.isViewable) {
+        if (!letter.isViewable()) {
             throw LetterViewableTimeExpiredException()
         }
         val letterPos = letter.longitude to letter.latitude
         if (letter.viewRange != 0 && distanceBetweenTwoPositionInMeter(pos, letterPos) > letter.viewRange)
             throw LetterNotCloseEnoughException(letter.viewRange)
         return DetailResponse(letter)
-    }
-
-    @Transactional
-    fun updateViewable(letterId: Long) {
-        val letter = letterRepository.findLetterById(letterId) ?: throw LetterNotFoundException(letterId)
-
-        if (letter.viewableTime != 0 && letter.isViewable && ChronoUnit.HOURS.between(
-                letter.createdAt,
-                LocalDateTime.now()
-            ) >= letter.viewableTime
-        ) {
-            letter.isViewable = false
-        }
-    }
-
-    @Transactional
-    @Scheduled(cron = "0 0 4 * * *", zone = "Asia/Seoul") // every 4AM
-    fun updateAllViewable() {
-        val letters = letterRepository.findAllByIsViewableTrueAndViewableTimeNot(0)
-        for (letter in letters) {
-            updateViewable(letter.id)
-        }
     }
 
     fun getMyLetters(userId: Long): ListResponse<Response> {
