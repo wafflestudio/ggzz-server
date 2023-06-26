@@ -6,6 +6,7 @@ import com.wafflestudio.ggzz.global.config.FirebaseConfig
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.springframework.http.HttpHeaders
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
@@ -31,10 +32,10 @@ class FirebaseTokenFilter(
     }
 
     private fun extractTokenFromRequest(request: HttpServletRequest): String? {
-        val authorizationHeader = request.getHeader("Authorization")
-        return if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            authorizationHeader.substring(7)
-        } else null
+        val authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION)
+        return authorizationHeader?.let {
+            if (it.startsWith("Bearer ")) it.removePrefix("Bearer ") else null
+        }
     }
 
     private fun createAuthentication(token: String): Authentication {

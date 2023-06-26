@@ -6,6 +6,8 @@ import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.global.config.FirebaseConfig
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito
@@ -20,7 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-////@ExtendWith(RestDocumentationExtension::class)
 @WebMvcTest(MyLetterController::class)
 @AutoConfigureMockMvc
 class MyLetterControllerTest @Autowired constructor(
@@ -31,39 +32,8 @@ class MyLetterControllerTest @Autowired constructor(
     @MockBean lateinit var userRepository: UserRepository
     @MockBean lateinit var firebaseConfig: FirebaseConfig
 
-    @Test
-    fun getMyLetters() {
-        // given
-        setupTestEnvironment() // Authentication 설정
-
-        // when
-        val result = this.mockMvc.perform(get("/api/v1/me/letters")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer test_token"))
-
-        // then
-        result.andExpect(status().isOk)
-//                    .andDo(
-//                document(
-//                    "getMyLetters/200",
-//                    getDocumentRequest(),
-//                    getDocumentResponse(),
-//                    responseFields(
-//                        fieldWithPath("count").description("내 편지 개수"),
-//                        fieldWithPath("data[].id").description("API에 사용되는 편지 ID"),
-//                        fieldWithPath("data[].created_at").description("편지 생성일자"),
-//                        fieldWithPath("data[].created_by").description("편지 생성자 닉네임"),
-//                        fieldWithPath("data[].title").description("편지 제목"),
-//                        fieldWithPath("data[].summary").description("편지 내용"),
-//                        fieldWithPath("data[].longitude").description("경도"),
-//                        fieldWithPath("data[].latitude").description("위도")
-//                    )
-//                )
-//            )
-        SecurityContextHolder.clearContext() // 인증 정보 제거
-    }
-
-    private fun setupTestEnvironment() {
+    @BeforeEach
+    fun setAuthentication() {
         val signUpRequest = UserDto.SignUpRequest("test_username", "test_nickname", "test_password")
         val createdUser = User("test_firebase_id", "test_username", "test_nickname", "encoded_password")
 
@@ -86,5 +56,21 @@ class MyLetterControllerTest @Autowired constructor(
 
         // SecurityContextHolder에 인증 정보 설정
         SecurityContextHolder.getContext().authentication = authentication
+    }
+
+    @AfterEach
+    fun cleanSecurityContext() {
+        SecurityContextHolder.clearContext() // 인증 정보 제거
+    }
+
+    @Test
+    fun getMyLetters() {
+        // when
+        val result = this.mockMvc.perform(get("/api/v1/me/letters")
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer test_token"))
+
+        // then
+        result.andExpect(status().isOk)
     }
 }

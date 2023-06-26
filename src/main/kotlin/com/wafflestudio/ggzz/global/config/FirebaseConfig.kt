@@ -17,7 +17,9 @@ interface FirebaseConfig {
 class FirebaseConfigImpl(
     @Value("\${google-services.json}") private val googleServicesJsonString: String
 ) : FirebaseConfig {
-    private val firebaseAuth: FirebaseAuth by lazy {
+    private val firebaseAuth: FirebaseAuth
+
+    init {
         try {
             val googleCredentials =
                 GoogleCredentials.fromStream(ByteArrayInputStream(googleServicesJsonString.toByteArray()))
@@ -27,10 +29,11 @@ class FirebaseConfigImpl(
                 .build()
 
             FirebaseApp.initializeApp(options)
+            firebaseAuth = FirebaseAuth.getInstance()
         } catch (e: Exception) {
             e.printStackTrace()
+            throw IllegalStateException("Failed to initialize FirebaseAuth.")
         }
-        FirebaseAuth.getInstance()
     }
 
     override fun verifyId(id: String): String =

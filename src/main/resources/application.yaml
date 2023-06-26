@@ -45,6 +45,10 @@ spring:
   config:
     activate:
       on-profile: dev
+  datasource:
+    url: ${dev.datasource.url}
+    username: ${dev.datasource.username}
+    password: ${dev.datasource.password}
 
 secrets-manager: dev/ggzz-server
 
