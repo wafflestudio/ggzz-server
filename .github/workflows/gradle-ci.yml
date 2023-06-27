@@ -30,11 +30,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      - name: Configure AWS CLI
-        run: |
-          aws configure set aws_access_key_id $aws-access-key-id --profile test
-          aws configure set aws_secret_access_key $aws-secret-access-key --profile test
-          aws configure set region $aws-region --profile test
+#      - name: Configure AWS CLI
+#        run: |
+#          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }} --profile test
+#          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }} --profile test
+#          aws configure set region ap-northeast-2 --profile test
 
       - name: Grant execution permission
         run: chmod +x ./gradlew
