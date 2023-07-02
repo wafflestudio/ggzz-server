@@ -43,6 +43,7 @@ enum class ErrorType {
 
     enum class Conflict(private val code: Int): ErrorTypeInterface {
         USERNAME_CONFLICT(9000),
+        LIKE_ALREADY_EXISTS(9001),
         ;
         override fun getCode(): Int = code
     }
