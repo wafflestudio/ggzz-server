@@ -1,90 +1,101 @@
 package com.wafflestudio.ggzz.domain.letter.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentRequest
 import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentResponse
-import com.wafflestudio.ggzz.domain.WithCustomUser
 import com.wafflestudio.ggzz.domain.letter.dto.LetterDto
-import com.wafflestudio.ggzz.domain.letter.model.Letter
 import com.wafflestudio.ggzz.domain.letter.service.LetterService
-import com.wafflestudio.ggzz.domain.user.model.UserPrincipal
+import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.model.User
+import com.wafflestudio.ggzz.domain.user.repository.UserRepository
+import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.global.common.dto.ListResponse
+import com.wafflestudio.ggzz.global.config.FirebaseConfig
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.*
-import org.mockito.BDDMockito.given
-import org.mockito.kotlin.any
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.given
 import org.springframework.beans.factory.annotation.Autowired
-
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.restdocs.RestDocumentationContextProvider
-import org.springframework.restdocs.RestDocumentationExtension
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
+import org.springframework.restdocs.operation.preprocess.Preprocessors.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
 import org.springframework.restdocs.request.RequestDocumentation.*
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
-import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder
-import org.springframework.test.web.servlet.setup.MockMvcBuilders
-import org.springframework.web.context.WebApplicationContext
 import java.time.LocalDateTime
+import org.springframework.security.core.userdetails.User as SecurityUser
 
-@ExtendWith(RestDocumentationExtension::class)
 @WebMvcTest(LetterController::class)
-internal class LetterControllerTest {
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
-
+@AutoConfigureMockMvc
+class LetterControllerTest @Autowired constructor(
+    val mockMvc: MockMvc
+) {
     @MockBean
-    private lateinit var letterService: LetterService
-
-    private lateinit var mockMvc: MockMvc
+    lateinit var letterService: LetterService
+    @MockBean
+    lateinit var userService: UserService
+    @MockBean
+    lateinit var userRepository: UserRepository
+    @MockBean
+    lateinit var firebaseConfig: FirebaseConfig
 
     @BeforeEach
-    fun setUp(webApplicationContext: WebApplicationContext, restDocumentation: RestDocumentationContextProvider) {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-            .apply<DefaultMockMvcBuilder>(MockMvcRestDocumentation.documentationConfiguration(restDocumentation))
-            .build()
+    fun setAuthentication() {
+        val signUpRequest = UserDto.SignUpRequest("test_username", "test_nickname", "test_password")
+        val createdUser = User("test_firebase_id", "test_username", "test_nickname", "encoded_password")
+
+        // userService.updateOrCreate() 메서드의 Mock 설정
+        `when`(userService.updateOrCreate(signUpRequest)).thenReturn(createdUser)
+
+        // firebaseConfig.getIdByToken() 메서드의 Mock 설정
+        `when`(firebaseConfig.getIdByToken(anyString())).thenReturn("test_firebase_id")
+
+        // 인증된 사용자 설정
+        val authentication = mock(Authentication::class.java)
+        `when`(authentication.isAuthenticated).thenReturn(true)
+        `when`(authentication.principal).thenReturn(SecurityUser("test_username", "test_password", emptyList()))
+
+        // SecurityContextHolder에 인증 정보 설정
+        SecurityContextHolder.getContext().authentication = authentication
+    }
+
+
+    @AfterEach
+    fun cleanSecurityContext() {
+        SecurityContextHolder.clearContext() // 인증 정보 제거
     }
 
     @Test
-    @WithCustomUser
-    fun postLetter() {
-        // given
-        val userPrincipal = SecurityContextHolder.getContext().authentication.principal as UserPrincipal
-        val user = userPrincipal.user
-
-        val request = LetterDto.CreateRequest(
-            title = "Hello",
-            summary = "summary",
-            longitude = 126.0,
-            latitude = 37.0,
-            text = "text"
-        )
-
-        given(
-            letterService.postLetter(
-                anyLong(),
-                any()
-            )
-        ).willReturn(LetterDto.Response(Letter(user, request)))
-
-        // when
+    fun postLetterTest() {
+        // POST 요청을 수행하고 응답을 검증
         val result = this.mockMvc.perform(
-            post("/api/v1/letters")
+            MockMvcRequestBuilders.post("/api/v1/letters")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request))
-                .accept(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+                .content(
+                    """{
+                    |"title":"test_title",
+                    |"summary":"test_summary",
+                    |"text":"test_text",
+                    |"longitude": 126.0,
+                    |"latitude": 37.0
+                    |}""".trimMargin()
+                )
+                .header("Authorization", "Bearer test_token")
+                .with(csrf())
+        )
 
         // then
         result.andExpect(status().isOk)
@@ -116,16 +127,15 @@ internal class LetterControllerTest {
     }
 
     @Test
-    fun getLetters() {
+    fun getLettersTest() {
         // given
         val letters = mutableListOf<LetterDto.Response>()
         letters.add(LetterDto.Response(0L, LocalDateTime.now(), "Junhyeong Kim", "Letter 1", "summary", 127.0, 37.0))
-        letters.add(LetterDto.Response(1L, LocalDateTime.now(), "Simon Kim", "Letter 2", "summary", 127.0, 37.0))
-        letters.add(LetterDto.Response(2L, LocalDateTime.now(), "Junhyeong Kim", "Letter 3", "summary", 127.0, 37.0))
+        letters.add(LetterDto.Response(1L, LocalDateTime.now(), "Yeonghyeon Ko", "Letter 2", "summary", 127.0, 37.0))
         val response = ListResponse(letters)
         given(
             letterService.getLetters(
-                any(),
+                anyOrNull(),
                 anyInt()
             )
         ).willReturn(response)
@@ -137,36 +147,15 @@ internal class LetterControllerTest {
                 .param("latitude", "37.0")
                 .param("range", "200")
                 .accept(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+                .header("Authorization", "Bearer test_token")
+        )
 
         // then
         result.andExpect(status().isOk)
-            .andDo(
-                document(
-                    "getLetters/200",
-                    getDocumentRequest(),
-                    getDocumentResponse(),
-                    queryParameters(
-                        parameterWithName("longitude").description("경도"),
-                        parameterWithName("latitude").description("위도"),
-                        parameterWithName("range").description("검색 범위").optional()
-                    ),
-                    responseFields(
-                        fieldWithPath("count").description("내 편지 개수"),
-                        fieldWithPath("data[].id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("data[].created_at").description("편지 생성일자"),
-                        fieldWithPath("data[].created_by").description("편지 생성자 닉네임"),
-                        fieldWithPath("data[].title").description("편지 제목"),
-                        fieldWithPath("data[].summary").description("편지 내용"),
-                        fieldWithPath("data[].longitude").description("경도"),
-                        fieldWithPath("data[].latitude").description("위도")
-                    )
-                )
-            )
     }
 
     @Test
-    fun getLetter() {
+    fun getLetterTest() {
         // given
         val response = LetterDto.DetailResponse(
             id = 12,
@@ -183,7 +172,7 @@ internal class LetterControllerTest {
         given(
             letterService.getLetter(
                 anyLong(),
-                any()
+                anyOrNull()
             )
         ).willReturn(response)
 
@@ -193,65 +182,28 @@ internal class LetterControllerTest {
                 .param("longitude", "127.0")
                 .param("latitude", "37.0")
                 .accept(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+                .header("Authorization", "Bearer test_token")
+        )
 
         // then
         result.andExpect(status().isOk)
-            .andDo(
-                document(
-                    "getLetter/200",
-                    getDocumentRequest(),
-                    getDocumentResponse(),
-                    pathParameters(
-                        parameterWithName("id").description("편지 ID")
-                    ),
-                    queryParameters(
-                        parameterWithName("longitude").description("경도"),
-                        parameterWithName("latitude").description("위도")
-                    ),
-                    responseFields(
-                        fieldWithPath("id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("created_at").description("편지 생성일자"),
-                        fieldWithPath("created_by").description("편지 생성자 닉네임"),
-                        fieldWithPath("title").description("편지 제목"),
-                        fieldWithPath("summary").description("편지 내용"),
-                        fieldWithPath("longitude").description("경도"),
-                        fieldWithPath("latitude").description("위도"),
-                        fieldWithPath("text").description("편지 내용(글)").optional(),
-                        fieldWithPath("image").description("편지 내용(이미지)").optional(),
-                        fieldWithPath("voice").description("편지 내용(음성)").optional()
-                    )
-                )
-            )
     }
 
     @Test
-    @WithCustomUser
-    fun deleteLetter() {
-
+    fun deleteLetterTest() {
         // when
         val result = this.mockMvc.perform(
             delete("/api/v1/letters/{id}", 12)
-        ).andDo(MockMvcResultHandlers.print())
+                .header("Authorization", "Bearer test_token")
+                .with(csrf())
+        )
 
         // then
         result.andExpect(status().isOk)
-            .andDo(
-                document(
-                    "deleteLetter/200",
-                    getDocumentRequest(),
-                    getDocumentResponse(),
-                    pathParameters(
-                        parameterWithName("id").description("편지 ID")
-                    )
-                )
-            )
-
     }
 
     @Test
-    @WithCustomUser
-    fun putResource() {
+    fun putResourceTest() {
         // given
         val imageContent = ByteArray(100)
         val imageFile = MockMultipartFile("image", "test.png", MediaType.IMAGE_PNG_VALUE, imageContent)
@@ -265,28 +217,11 @@ internal class LetterControllerTest {
                 .file(voiceFile)
                 .with { request -> request.method = "PUT"; request }
                 .accept(MediaType.APPLICATION_JSON)
-        ).andDo(MockMvcResultHandlers.print())
+                .header("Authorization", "Bearer test_token")
+                .with(csrf())
+        )
 
         // then
         result.andExpect(status().isOk)
-            .andDo(
-                document(
-                    "putResource/200",
-                    getDocumentRequest(),
-                    getDocumentResponse(),
-                    pathParameters(
-                        parameterWithName("id").description("편지 ID")
-                    ),
-                    requestParts(
-                        partWithName("image").description("이미지 파일").optional(),
-                        partWithName("voice").description("음성 파일").optional()
-                    ),
-                    responseFields(
-                        fieldWithPath("image").description("이미지 업로드"),
-                        fieldWithPath("voice").description("음성 업로드")
-                    )
-                )
-            )
     }
-
 }

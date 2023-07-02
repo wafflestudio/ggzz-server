@@ -49,7 +49,7 @@ class LetterDto {
         constructor(letter: Letter) : this(
             id = letter.id,
             createdAt = letter.createdAt,
-            createdBy = letter.user.nickname,
+            createdBy = letter.user.nickname!!,
             title = letter.title,
             summary = letter.summary,
             longitude = letter.longitude,
@@ -82,7 +82,7 @@ class LetterDto {
         constructor(letter: Letter) : this(
             id = letter.id,
             createdAt = letter.createdAt,
-            createdBy = letter.user.nickname,
+            createdBy = letter.user.nickname!!,
             title = letter.title,
             summary = letter.summary,
             longitude = letter.longitude,
