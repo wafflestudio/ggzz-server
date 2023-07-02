@@ -21,7 +21,7 @@ enum class ErrorType {
     enum class Unauthorized(private val code: Int): ErrorTypeInterface {
         NOT_LOGGED_IN(1000),
         LOGIN_FAIL(1001),
-        Invalid_FIREBASE_TOKEN(1002),
+        INVALID_FIREBASE_TOKEN(1002),
         ;
         override fun getCode(): Int = code
     }

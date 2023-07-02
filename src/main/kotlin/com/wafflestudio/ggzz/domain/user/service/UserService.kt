@@ -20,9 +20,7 @@ internal class UserServiceImpl(
     private val passwordEncoder: PasswordEncoder
 ) : UserService {
     override fun updateOrCreate(request: UserDto.SignUpRequest): User {
-        val username = request.username ?: throw BadRequestException()
-        val nickname = request.nickname ?: throw BadRequestException()
-        val password = request.password ?: throw BadRequestException()
+        val username = request.username!!
 
         val authentication = SecurityContextHolder.getContext().authentication
         if (authentication != null && authentication.isAuthenticated) {
@@ -32,8 +30,8 @@ internal class UserServiceImpl(
                 throw DuplicateUsernameException(username)
             }
             user.username = username
-            user.nickname = nickname
-            user.password = passwordEncoder.encode(password)
+            user.nickname = request.nickname
+            user.password = passwordEncoder.encode(request.password)
             return userRepository.save(user)
         } else {
             throw UserNotFoundException()

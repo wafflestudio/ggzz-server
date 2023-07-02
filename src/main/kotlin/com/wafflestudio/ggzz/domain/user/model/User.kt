@@ -8,7 +8,7 @@ import jakarta.persistence.*
 import org.springframework.security.core.GrantedAuthority
 
 @Entity
-data class User(
+class User(
     @Column(unique = true)
     val firebaseId: String,
     var username: String?,
@@ -17,8 +17,8 @@ data class User(
     @ElementCollection(targetClass = UserRole::class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     val roles: Set<UserRole> = setOf(UserRole.USER), // 서버 단에서 수동으로 USER -> ADMIN 변경
-    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.EAGER)
-    val letters: MutableList<Letter>? = mutableListOf(),
+    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+    val letters: MutableList<Letter> = mutableListOf(),
 ) : BaseTimeTraceEntity() {
     constructor(firebaseId: String, request: SignUpRequest?, encodedPassword: String?) : this(
         firebaseId = firebaseId,
