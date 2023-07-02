@@ -13,14 +13,15 @@ enum class ErrorType {
         LETTER_NOT_CLOSE_ENOUGH(2),
         UNSUPPORTED_FILE_TYPE(3),
         FILE_TOO_LARGE(4),
-
+        UNSATISFIED_REQUEST(5),
         ;
         override fun getCode(): Int = code
     }
 
     enum class Unauthorized(private val code: Int): ErrorTypeInterface {
         NOT_LOGGED_IN(1000),
-        LOGIN_FAIL(10001),
+        LOGIN_FAIL(1001),
+        INVALID_FIREBASE_TOKEN(1002),
         ;
         override fun getCode(): Int = code
     }

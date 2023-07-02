@@ -1,48 +1,40 @@
 package com.wafflestudio.ggzz.domain.user.service
 
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
+import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.exception.BadRequestException
 import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
-import com.wafflestudio.ggzz.domain.user.exception.LoginFailedException
+import com.wafflestudio.ggzz.domain.user.exception.UserNotFoundException
 import com.wafflestudio.ggzz.domain.user.model.User
-import com.wafflestudio.ggzz.domain.user.model.UserPrincipal
-import com.wafflestudio.ggzz.domain.user.model.UserToken
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.web.context.request.RequestAttributes
-import org.springframework.web.context.request.RequestContextHolder
+
+interface UserService {
+    fun updateOrCreate(request: UserDto.SignUpRequest): User
+}
 
 @Service
-@Transactional(readOnly = true)
-class UserService(
+internal class UserServiceImpl(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder,
-) {
-    @Transactional
-    fun signup(request: SignUpRequest) {
-        if (userRepository.existsByUsername(request.username!!)) throw DuplicateUsernameException(request.username)
+    private val passwordEncoder: PasswordEncoder
+) : UserService {
+    override fun updateOrCreate(request: UserDto.SignUpRequest): User {
+        val username = request.username!!
 
-        val user = User(request, passwordEncoder.encode(request.password))
+        val authentication = SecurityContextHolder.getContext().authentication
+        if (authentication != null && authentication.isAuthenticated) {
+            val user = authentication.principal as User
 
-        userRepository.save(user)
-
-        val context = SecurityContextHolder.getContext()
-        context.authentication = UserToken(UserPrincipal(user))
-        RequestContextHolder.currentRequestAttributes()
-            .setAttribute("SPRING_SECURITY_CONTEXT", context, RequestAttributes.SCOPE_SESSION)
-    }
-
-    fun login(request: LoginRequest) {
-        val user = userRepository.findByUsername(request.username!!) ?: throw LoginFailedException()
-
-        if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
-
-        val context = SecurityContextHolder.getContext()
-        context.authentication = UserToken(UserPrincipal(user))
-        RequestContextHolder.currentRequestAttributes()
-            .setAttribute("SPRING_SECURITY_CONTEXT", context, RequestAttributes.SCOPE_SESSION)
+            if (user.username != username && userRepository.existsByUsername(username)) {
+                throw DuplicateUsernameException(username)
+            }
+            user.username = username
+            user.nickname = request.nickname
+            user.password = passwordEncoder.encode(request.password)
+            return userRepository.save(user)
+        } else {
+            throw UserNotFoundException()
+        }
     }
 }
