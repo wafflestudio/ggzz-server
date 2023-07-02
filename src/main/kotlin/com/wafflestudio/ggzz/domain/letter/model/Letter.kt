@@ -36,7 +36,7 @@ class Letter(
         viewableTime = request.viewableTime!!,
         viewRange = request.viewRange!!
     ) {
-        user.letters.add(this)
+        user.letters?.add(this)
     }
 
     fun isViewable(): Boolean {

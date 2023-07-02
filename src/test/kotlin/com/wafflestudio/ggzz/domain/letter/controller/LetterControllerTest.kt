@@ -43,14 +43,11 @@ import org.springframework.security.core.userdetails.User as SecurityUser
 class LetterControllerTest @Autowired constructor(
     val mockMvc: MockMvc
 ) {
-    @MockBean
-    lateinit var letterService: LetterService
-    @MockBean
-    lateinit var userService: UserService
-    @MockBean
-    lateinit var userRepository: UserRepository
-    @MockBean
-    lateinit var firebaseConfig: FirebaseConfig
+
+    @MockBean lateinit var letterService: LetterService
+    @MockBean lateinit var userService: UserService
+    @MockBean lateinit var userRepository: UserRepository
+    @MockBean lateinit var firebaseConfig: FirebaseConfig
 
     @BeforeEach
     fun setAuthentication() {
