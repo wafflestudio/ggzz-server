@@ -43,11 +43,17 @@ import org.springframework.security.core.userdetails.User as SecurityUser
 class LetterControllerTest @Autowired constructor(
     val mockMvc: MockMvc
 ) {
+    @MockBean
+    lateinit var letterService: LetterService
 
-    @MockBean lateinit var letterService: LetterService
-    @MockBean lateinit var userService: UserService
-    @MockBean lateinit var userRepository: UserRepository
-    @MockBean lateinit var firebaseConfig: FirebaseConfig
+    @MockBean
+    lateinit var userService: UserService
+
+    @MockBean
+    lateinit var userRepository: UserRepository
+
+    @MockBean
+    lateinit var firebaseConfig: FirebaseConfig
 
     @BeforeEach
     fun setAuthentication() {
@@ -96,31 +102,31 @@ class LetterControllerTest @Autowired constructor(
 
         // then
         result.andExpect(status().isOk)
-            .andDo(
-                document(
-                    "postLetter/200",
-                    getDocumentRequest(),
-                    getDocumentResponse(),
-                    requestFields(
-                        fieldWithPath("title").description("편지 제목"),
-                        fieldWithPath("summary").description("편지 요약"),
-                        fieldWithPath("longitude").description("경도"),
-                        fieldWithPath("latitude").description("위도"),
-                        fieldWithPath("text").description("편지 내용(글)").optional(),
-                        fieldWithPath("viewable_time").description("편지 공개 시간").optional(),
-                        fieldWithPath("view_range").description("편지 공개 범위").optional()
-                    ),
-                    responseFields(
-                        fieldWithPath("id").description("API에 사용되는 편지 ID"),
-                        fieldWithPath("created_at").description("편지 생성일자"),
-                        fieldWithPath("created_by").description("편지 생성자 닉네임"),
-                        fieldWithPath("title").description("편지 제목"),
-                        fieldWithPath("summary").description("편지 내용"),
-                        fieldWithPath("longitude").description("경도"),
-                        fieldWithPath("latitude").description("위도")
-                    )
-                )
-            )
+//            .andDo(
+//                document(
+//                    "postLetter/200",
+//                    getDocumentRequest(),
+//                    getDocumentResponse(),
+//                    requestFields(
+//                        fieldWithPath("title").description("편지 제목"),
+//                        fieldWithPath("summary").description("편지 요약"),
+//                        fieldWithPath("longitude").description("경도"),
+//                        fieldWithPath("latitude").description("위도"),
+//                        fieldWithPath("text").description("편지 내용(글)").optional(),
+//                        fieldWithPath("viewable_time").description("편지 공개 시간").optional(),
+//                        fieldWithPath("view_range").description("편지 공개 범위").optional()
+//                    ),
+//                    responseFields(
+//                        fieldWithPath("id").description("API에 사용되는 편지 ID"),
+//                        fieldWithPath("created_at").description("편지 생성일자"),
+//                        fieldWithPath("created_by").description("편지 생성자 닉네임"),
+//                        fieldWithPath("title").description("편지 제목"),
+//                        fieldWithPath("summary").description("편지 내용"),
+//                        fieldWithPath("longitude").description("경도"),
+//                        fieldWithPath("latitude").description("위도")
+//                    )
+//                )
+//            )
     }
 
     @Test

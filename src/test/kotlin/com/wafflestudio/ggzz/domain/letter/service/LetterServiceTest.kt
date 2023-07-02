@@ -28,6 +28,7 @@ internal class LetterServiceTest : BehaviorSpec({
     given("공개 시간이 끝난 끄적과 끝나지 않은 끄적이 있을때") {
 
         val user = User(
+            firebaseId = "fbId",
             username = "Simon",
             nickname = "paul",
             password = "password"
@@ -84,6 +85,7 @@ internal class LetterServiceTest : BehaviorSpec({
 
     given("공개 범위보다 가까운 끄적과 먼 끄적이 있을때") {
         val user = User(
+            firebaseId = "fbId",
             username = "Simon",
             nickname = "paul",
             password = "password"
