@@ -18,6 +18,8 @@ class Letter(
     var text: String?,
     var image: String?,
     var voice: String?,
+
+    var numberOfLikes: Int = 0,
 ): BaseTimeTraceEntity() {
     constructor(user: User, request: CreateRequest) : this(
         user = user,
