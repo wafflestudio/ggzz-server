@@ -37,6 +37,7 @@ enum class ErrorType {
 
     enum class NotFound(private val code: Int) : ErrorTypeInterface {
         LETTER_NOT_FOUND(4000),
+        USER_NOT_FOUND(4001),
         ;
 
         override fun getCode(): Int = code
@@ -44,6 +45,7 @@ enum class ErrorType {
 
     enum class Conflict(private val code: Int) : ErrorTypeInterface {
         USERNAME_CONFLICT(9000),
+        LIKE_ALREADY_EXISTS(9001),
         ;
 
         override fun getCode(): Int = code

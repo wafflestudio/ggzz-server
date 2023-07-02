@@ -20,6 +20,7 @@ class Letter(
     var text: String?,
     var image: String?,
     var voice: String?,
+    var numberOfLikes: Int = 0,
     val viewableTime: Int = 0,
     val viewRange: Int = 0
 ) : BaseTimeTraceEntity() {
