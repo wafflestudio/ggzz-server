@@ -62,8 +62,9 @@ class LetterService(
             throw LetterViewableTimeExpiredException()
         }
         val letterPos = letter.longitude to letter.latitude
-        if (letter.viewRange != 0 && distanceBetweenTwoPositionInMeter(pos, letterPos) > letter.viewRange)
-            throw LetterNotCloseEnoughException(letter.viewRange)
+        val distance = distanceBetweenTwoPositionInMeter(pos, letterPos)
+        if (letter.viewRange != 0 && distance > letter.viewRange)
+            throw LetterNotCloseEnoughException(letter.viewRange, distance)
         return DetailResponse(letter)
     }
 
