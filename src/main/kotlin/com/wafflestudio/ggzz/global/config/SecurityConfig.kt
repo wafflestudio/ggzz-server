@@ -61,7 +61,7 @@ class SecurityConfig(
             .and()
             .csrf().disable()
             .logout().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .addFilterBefore(firebaseTokenFilter(), UsernamePasswordAuthenticationFilter::class.java)
             .exceptionHandling()

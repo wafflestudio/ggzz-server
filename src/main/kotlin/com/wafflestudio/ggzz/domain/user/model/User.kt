@@ -36,5 +36,13 @@ class User(
         password = null
     )
 
+    constructor() : this(
+        firebaseId = "",
+        username = "",
+        nickname = "",
+        password = "",
+    )
+
     fun getAuthorities(): Set<GrantedAuthority> = roles
+
 }

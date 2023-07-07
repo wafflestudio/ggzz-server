@@ -85,7 +85,7 @@ class JwtTokenProvider (
 
     fun validateToken(authToken: String): Boolean {
         try {
-            return getAllClaims(authToken).expiration.before(Date())
+            return getAllClaims(authToken).expiration.after(Date())
         } catch (e: ExpiredJwtException) {
             throw TokenExpiredException(Type.ACCESS.toString().lowercase())
         } catch (e: Exception) {
