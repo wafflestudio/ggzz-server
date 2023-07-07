@@ -26,4 +26,10 @@ class User(
         nickname = request.nickname!!,
         password = encodedPassword
     )
+
+    constructor() : this(
+        username = "",
+        nickname = "",
+        password = "",
+    )
 }
