@@ -7,9 +7,9 @@ import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import jakarta.servlet.http.Cookie
+import org.junit.jupiter.api.Test
 import com.wafflestudio.ggzz.global.config.FirebaseConfig
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentMatchers.anyLong
 import org.mockito.BDDMockito.given
@@ -20,12 +20,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseCookie
+import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.context.junit.jupiter.SpringExtension
-import org.springframework.http.ResponseCookie
-import org.springframework.http.ResponseEntity
 import org.springframework.restdocs.RestDocumentationContextProvider
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
@@ -34,7 +34,6 @@ import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
-import java.util.*
 import org.springframework.security.core.userdetails.User as SecurityUser
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.header
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status

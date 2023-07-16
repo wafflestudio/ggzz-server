@@ -1,8 +1,8 @@
 package com.wafflestudio.ggzz.global.config
 
+import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.config.filter.FirebaseTokenFilter
-import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
 import com.wafflestudio.ggzz.global.error.CustomAccessDeniedHandler
 import com.wafflestudio.ggzz.global.error.CustomEntryPoint
 import org.springframework.context.annotation.Bean

@@ -1,6 +1,21 @@
 spring:
   profiles:
-    active: dev
+    active: local
+
+---
+
+spring:
+  jpa:
+    open-in-view: false
+    generate-ddl: false
+    hibernate:
+      ddl-auto: validate
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 20MB
+  jackson:
+    property-naming-strategy: SNAKE_CASE
 
 ---
 

@@ -1,8 +1,8 @@
 package com.wafflestudio.ggzz.domain.user.service
 
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.AuthToken
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.AuthToken
 import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
 import com.wafflestudio.ggzz.domain.user.exception.LoginFailedException
 import com.wafflestudio.ggzz.domain.user.exception.UserNotFoundException
@@ -27,6 +27,7 @@ interface UserService {
     fun logout(userId: Long): ResponseEntity<Any>
     fun refresh(cookie: Cookie): ResponseEntity<AuthToken>
 }
+
 
 
 @Service
