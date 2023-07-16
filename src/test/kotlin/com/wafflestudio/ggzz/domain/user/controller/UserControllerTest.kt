@@ -33,7 +33,6 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.pos
 import org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath
 import org.springframework.restdocs.payload.PayloadDocumentation.requestFields
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
 import java.util.*
 import org.springframework.security.core.userdetails.User as SecurityUser
@@ -47,7 +46,7 @@ import org.springframework.web.context.WebApplicationContext
 @WebMvcTest(UserController::class)
 @AutoConfigureMockMvc
 class UserControllerTests @Autowired constructor(
-    val mockMvc: MockMvc
+    var mockMvc: MockMvc
 ) {
     @Autowired
     private lateinit var objectMapper: ObjectMapper

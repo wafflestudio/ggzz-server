@@ -5,6 +5,7 @@ import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.exception.DuplicateUsernameException
 import com.wafflestudio.ggzz.domain.user.exception.LoginFailedException
+import com.wafflestudio.ggzz.domain.user.exception.UserNotFoundException
 import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
@@ -22,6 +23,9 @@ import org.springframework.http.ResponseCookie
 
 interface UserService {
     fun updateOrCreate(request: SignUpRequest): User
+    fun login(request: LoginRequest): ResponseEntity<AuthToken>
+    fun logout(userId: Long): ResponseEntity<Any>
+    fun refresh(cookie: Cookie): ResponseEntity<AuthToken>
 }
 
 
@@ -50,7 +54,7 @@ internal class UserServiceImpl(
         }
     }
 
-    fun login(request: LoginRequest): ResponseEntity<AuthToken> {
+    override fun login(request: LoginRequest): ResponseEntity<AuthToken> {
         val user = userRepository.findByUsername(request.username!!) ?: throw LoginFailedException()
 
         if (!passwordEncoder.matches(request.password, user.password)) throw LoginFailedException()
@@ -63,7 +67,7 @@ internal class UserServiceImpl(
             .body(AuthToken(accessToken))
     }
 
-    fun logout(userId: Long): ResponseEntity<Any> {
+    override fun logout(userId: Long): ResponseEntity<Any> {
         val user = userRepository.findMeById(userId)
         user.refreshToken = null
 
@@ -78,7 +82,7 @@ internal class UserServiceImpl(
         return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie).build()
     }
 
-    fun refresh(cookie: Cookie): ResponseEntity<AuthToken> {
+    override fun refresh(cookie: Cookie): ResponseEntity<AuthToken> {
         val refreshToken = cookie.value
         val username = jwtTokenProvider.getUsernameFromToken(refreshToken, Type.REFRESH)
         val user = userRepository.findByUsername(username) ?: throw InvalidTokenException("Refresh")
