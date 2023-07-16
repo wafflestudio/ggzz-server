@@ -1,15 +1,21 @@
 package com.wafflestudio.ggzz.domain.user.controller
 
 import com.wafflestudio.ggzz.domain.user.dto.UserDto
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.AuthToken
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
+import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
+import com.wafflestudio.ggzz.domain.user.model.CurrentUser
 import io.swagger.v3.oas.annotations.Operation
+import jakarta.servlet.http.Cookie
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
-import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.CookieValue
 
 @RestController
 class UserController(
@@ -19,26 +25,38 @@ class UserController(
 
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    fun signup(@RequestBody @Valid request: UserDto.SignUpRequest): ResponseEntity<UserDto.UserResponse> {
+    fun signup(@RequestBody @Valid request: SignUpRequest): ResponseEntity<UserDto.UserResponse> {
         logger.info("POST /signup")
         val user = userService.updateOrCreate(request)
         val userResponse = UserDto.UserResponse.fromEntity(user)
-
         return ResponseEntity.ok(userResponse)
     }
 
-    @Operation(summary = "로그아웃: JSESSIONID 쿠키 삭제 용도")
-    @PostMapping("/logout")
-    fun logout(): ResponseEntity<Any> {
-        logger.info("POST /logout")
-        val cookie = ResponseCookie.from("JSESSIONID", "")
-            .maxAge(0)
-            .path("/")
-            .secure(true)
-            .sameSite("None")
-            .httpOnly(true)
-            .build().toString()
+    @Operation(summary = "로그인")
+    @PostMapping("/login")
+    fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<AuthToken> {
+        logger.info("POST /login")
+        return userService.login(request)
+    }
 
-        return ResponseEntity.ok().header("Set-cookie", cookie).build()
+    @Operation(summary = "로그인 확인 용도")
+    @GetMapping("/login")
+    fun isLoggedIn(): ResponseEntity<Any> {
+        logger.info("GET /login")
+        return ResponseEntity.ok().build()
+    }
+
+    @Operation(summary = "로그아웃: refreshToken 쿠키 삭제 용도")
+    @PostMapping("/logout")
+    fun logout(@CurrentUser userId: Long): ResponseEntity<Any> {
+        logger.info("POST /logout")
+        return userService.logout(userId)
+    }
+
+    @Operation(summary = "accessToken 재발급")
+    @PostMapping("/refresh")
+    fun refresh(@CookieValue(value = "refreshToken", required = false) cookie: Cookie): ResponseEntity<AuthToken> {
+        logger.info("POST /refresh")
+        return userService.refresh(cookie)
     }
 }

@@ -1,4 +1,9 @@
-secrets-manager: dev/ggzz-server
+#spring:
+#  datasource:
+#    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+#    driverClassName: org.h2.Driver
+#    username: sa
+#secrets-manager: dev/ggzz-server
 spring:
   datasource:
     driverClassName: org.h2.Driver
@@ -16,3 +21,9 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+auth.jwt:
+  issuer: GGZZ
+  jwtSecret: WAFFLE_STUDIO_GGZZ_JSON_WEB_TOKEN_SECRET_KEY
+  jwtExpiration: 7200
+  refreshExpiration: 172800

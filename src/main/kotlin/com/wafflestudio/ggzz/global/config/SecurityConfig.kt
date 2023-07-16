@@ -1,5 +1,6 @@
 package com.wafflestudio.ggzz.global.config
 
+import com.wafflestudio.ggzz.global.auth.JwtTokenProvider
 import com.wafflestudio.ggzz.domain.user.repository.UserRepository
 import com.wafflestudio.ggzz.global.config.filter.FirebaseTokenFilter
 import com.wafflestudio.ggzz.global.error.CustomAccessDeniedHandler
@@ -9,6 +10,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
+import org.springframework.security.config.annotation.web.builders.WebSecurity
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -19,11 +23,13 @@ import org.springframework.web.cors.CorsConfigurationSource
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 
 @Configuration
+@EnableWebSecurity
 class SecurityConfig(
     private val firebaseConfig: FirebaseConfig,
     private val userRepository: UserRepository,
     private val customEntryPoint: CustomEntryPoint,
     private val customAccessDeniedHandler: CustomAccessDeniedHandler,
+    private val jwtTokenProvider: JwtTokenProvider,
 ) {
 
     companion object {
@@ -33,7 +39,18 @@ class SecurityConfig(
         )
         private val SWAGGER = arrayOf("/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**")
         private val GET_WHITELIST = arrayOf("/ping", "/api/v1/letters/**", "/docs/index.html")
-        private val POST_WHITELIST = arrayOf("/signup", "/logout")
+        private val POST_WHITELIST = arrayOf("/signup", "/login", "/logout", "/refresh")
+    }
+
+
+    @Bean
+    fun ignoringCustomizer(): WebSecurityCustomizer {
+        return WebSecurityCustomizer { web: WebSecurity ->
+            web.ignoring()
+                .requestMatchers(HttpMethod.GET, *SWAGGER)
+                .requestMatchers(HttpMethod.GET, *GET_WHITELIST)
+                .requestMatchers(HttpMethod.POST, *POST_WHITELIST)
+        }
     }
 
     @Bean
@@ -44,7 +61,7 @@ class SecurityConfig(
             .and()
             .csrf().disable()
             .logout().disable()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .addFilterBefore(firebaseTokenFilter(), UsernamePasswordAuthenticationFilter::class.java)
             .exceptionHandling()
@@ -58,6 +75,7 @@ class SecurityConfig(
             .requestMatchers("/api/v1/**").authenticated()
             .requestMatchers(HttpMethod.GET, "/login").authenticated()
             .and()
+            .addFilterBefore(JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter::class.java)
             .build()
     }
 
