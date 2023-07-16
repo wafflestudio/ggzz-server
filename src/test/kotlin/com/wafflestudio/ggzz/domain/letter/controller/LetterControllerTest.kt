@@ -1,7 +1,5 @@
 package com.wafflestudio.ggzz.domain.letter.controller
 
-import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentRequest
-import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentResponse
 import com.wafflestudio.ggzz.domain.letter.dto.LetterDto
 import com.wafflestudio.ggzz.domain.letter.service.LetterService
 import com.wafflestudio.ggzz.domain.user.dto.UserDto
@@ -16,15 +14,12 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.*
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.given
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
-import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
 import org.springframework.restdocs.operation.preprocess.Preprocessors.*
 import org.springframework.restdocs.payload.PayloadDocumentation.*
@@ -136,12 +131,12 @@ class LetterControllerTest @Autowired constructor(
         letters.add(LetterDto.Response(0L, LocalDateTime.now(), "Junhyeong Kim", "Letter 1", "summary", 127.0, 37.0))
         letters.add(LetterDto.Response(1L, LocalDateTime.now(), "Yeonghyeon Ko", "Letter 2", "summary", 127.0, 37.0))
         val response = ListResponse(letters)
-        given(
+        `when`(
             letterService.getLetters(
-                anyOrNull(),
+                any(),
                 anyInt()
             )
-        ).willReturn(response)
+        ).thenReturn(response)
 
         // when
         val result = this.mockMvc.perform(
@@ -172,12 +167,12 @@ class LetterControllerTest @Autowired constructor(
             image = null,
             voice = null
         )
-        given(
+        `when`(
             letterService.getLetter(
                 anyLong(),
-                anyOrNull()
+                any()
             )
-        ).willReturn(response)
+        ).thenReturn(response)
 
         // when
         val result = this.mockMvc.perform(

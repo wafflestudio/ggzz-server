@@ -1,9 +1,9 @@
 package com.wafflestudio.ggzz.global.config
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
+import org.springframework.boot.json.JacksonJsonParser
 import org.springframework.context.EnvironmentAware
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
@@ -14,7 +14,9 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueReques
 
 @Configuration
 @Profile("dev", "local", "test")
-class SecretsManagerConfig : EnvironmentAware, BeanFactoryPostProcessor {
+class SecretsManagerConfig(
+    private val objectMapper: ObjectMapper
+) : EnvironmentAware, BeanFactoryPostProcessor {
     private lateinit var env: Environment
 
     override fun setEnvironment(environment: Environment) {
@@ -24,11 +26,11 @@ class SecretsManagerConfig : EnvironmentAware, BeanFactoryPostProcessor {
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
         val secretNames = env.getProperty("secrets-manager", "").split(",")
         val region = Region.AP_NORTHEAST_2
-        val objectMapper = jacksonObjectMapper()
+        val objectMapper = JacksonJsonParser(objectMapper)
         secretNames.forEach { secretName ->
             val secretString = getSecretString(secretName, region)
-            val map = objectMapper.readValue<Map<String, String>>(secretString)
-            map.forEach { (key, value) -> System.setProperty(key, value) }
+            val map = objectMapper.parseMap(secretString)
+            map.forEach { (key, value) -> System.setProperty(key, value.toString()) }
         }
     }
 

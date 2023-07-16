@@ -7,7 +7,6 @@ import com.wafflestudio.ggzz.domain.letter.dto.LetterDto.Response
 import com.wafflestudio.ggzz.domain.letter.service.LetterService
 import com.wafflestudio.ggzz.domain.user.model.CurrentUser
 import com.wafflestudio.ggzz.global.common.dto.ListResponse
-import io.swagger.v3.oas.annotations.Operation
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Positive
@@ -27,14 +26,12 @@ class LetterController(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Operation(summary = "편지 올리기")
     @PostMapping
     fun postLetter(@CurrentUser userId: Long, @RequestBody @Valid request: CreateRequest): ResponseEntity<Response> {
         logger.info("POST /api/v1/letters, {}", request)
         return ResponseEntity.ok(letterService.postLetter(userId, request))
     }
 
-    @Operation(summary = "현재 위치 기준으로 편지 리스트 가져오기")
     @GetMapping
     fun getLetters(
         @RequestParam @NotNull @Range(min = -180, max = 180) longitude: Double?,
@@ -45,7 +42,6 @@ class LetterController(
         return ResponseEntity.ok(letterService.getLetters(longitude!! to latitude!!, range!!))
     }
 
-    @Operation(summary = "현재 위치 기준으로 편지 확인하기", description = "현재 위치 기준 30m 이내")
     @GetMapping("/{id}")
     fun getLetter(
         @PathVariable id: Long,
@@ -56,7 +52,6 @@ class LetterController(
         return ResponseEntity.ok(letterService.getLetter(id, longitude!! to latitude!!))
     }
 
-    @Operation(summary = "편지 삭제하기")
     @DeleteMapping("/{id}")
     fun deleteLetter(
         @CurrentUser userId: Long,
@@ -67,7 +62,6 @@ class LetterController(
         return ResponseEntity.ok().build()
     }
 
-    @Operation(summary = "편지 이미지나 음성 올리기")
     @PutMapping("/{id}/source")
     fun putResource(
         @CurrentUser userId: Long,

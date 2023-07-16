@@ -14,6 +14,8 @@ enum class ErrorType {
         UNSUPPORTED_FILE_TYPE(3),
         FILE_TOO_LARGE(4),
         UNSATISFIED_REQUEST(5),
+        LETTER_VIEWABLE_TIME_EXPIRED(6),
+        INVALID_TOKEN(7),
         ;
 
         override fun getCode(): Int = code

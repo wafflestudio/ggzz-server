@@ -6,7 +6,6 @@ import com.wafflestudio.ggzz.domain.user.dto.UserDto.LoginRequest
 import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.domain.user.model.CurrentUser
-import io.swagger.v3.oas.annotations.Operation
 import jakarta.servlet.http.Cookie
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
@@ -23,7 +22,6 @@ class UserController(
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    @Operation(summary = "회원가입")
     @PostMapping("/signup")
     fun signup(@RequestBody @Valid request: SignUpRequest): ResponseEntity<UserDto.UserResponse> {
         logger.info("POST /signup")
@@ -32,28 +30,24 @@ class UserController(
         return ResponseEntity.ok(userResponse)
     }
 
-    @Operation(summary = "로그인")
     @PostMapping("/login")
     fun login(@RequestBody @Valid request: LoginRequest): ResponseEntity<AuthToken> {
         logger.info("POST /login")
         return userService.login(request)
     }
 
-    @Operation(summary = "로그인 확인 용도")
     @GetMapping("/login")
     fun isLoggedIn(): ResponseEntity<Any> {
         logger.info("GET /login")
         return ResponseEntity.ok().build()
     }
 
-    @Operation(summary = "로그아웃: refreshToken 쿠키 삭제 용도")
     @PostMapping("/logout")
     fun logout(@CurrentUser userId: Long): ResponseEntity<Any> {
         logger.info("POST /logout")
         return userService.logout(userId)
     }
 
-    @Operation(summary = "accessToken 재발급")
     @PostMapping("/refresh")
     fun refresh(@CookieValue(value = "refreshToken", required = false) cookie: Cookie): ResponseEntity<AuthToken> {
         logger.info("POST /refresh")
