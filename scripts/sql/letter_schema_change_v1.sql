@@ -1,0 +1,3 @@
+ALTER TABLE letter
+ADD COLUMN viewable_time INT DEFAULT 0,
+ADD COLUMN view_range INT DEFAULT 0;
