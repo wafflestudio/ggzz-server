@@ -1,10 +1,13 @@
 |===
-|Path|Type|Description|Optional
+|Path|Type|Description|Format|Example|Default Value|Optional
 
 {{#fields}}
 |{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
 |{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
 |{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{format}}{{/tableCellContent}}
+|{{#tableCellContent}}{{sample}}{{/tableCellContent}}
+|{{#tableCellContent}}{{default_value}}{{/tableCellContent}}
 |{{#tableCellContent}}_{{optional}}_{{/tableCellContent}}
 
 {{/fields}}

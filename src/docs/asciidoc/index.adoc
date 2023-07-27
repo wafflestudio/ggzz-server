@@ -1,5 +1,3 @@
-:includedir: src/docs/asciidoc
-
 = 끄적 API Documentation
 :doctype: book
 :icons: font
@@ -8,7 +6,11 @@
 :toclevels: 2
 :sectlinks:
 
-include::{includedir}/User-API.adoc[]
+include::api-auth.adoc[]
 
-include::{includedir}/Letter-API.adoc[]
+include::api-letter.adoc[]
+include::api-letter-interaction.adoc[]
+include::api-letter-me.adoc[]
+
+include::api-user.adoc[]
 

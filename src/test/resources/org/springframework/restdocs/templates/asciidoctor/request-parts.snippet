@@ -1,9 +1,13 @@
 |===
-|Part|Description|Optional
+|Part|Type|Description|Format|Example|Default Value|Optional
 
 {{#requestParts}}
 |{{#tableCellContent}}`+{{name}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{part_type}}{{/tableCellContent}}
 |{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{format}}{{/tableCellContent}}
+|{{#tableCellContent}}{{sample}}{{/tableCellContent}}
+|{{#tableCellContent}}{{default_value}}{{/tableCellContent}}
 |{{#tableCellContent}}_{{optional}}_{{/tableCellContent}}
 
 {{/requestParts}}

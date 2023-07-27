@@ -1,9 +1,13 @@
 |===
-|Parameter|Description|Optional
+|Parameter|Type|Description|Format|Example|Default Value|Optional
 
 {{#parameters}}
 |{{#tableCellContent}}`+{{name}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{param_type}}{{/tableCellContent}}
 |{{#tableCellContent}}{{description}}{{/tableCellContent}}
+|{{#tableCellContent}}{{format}}{{/tableCellContent}}
+|{{#tableCellContent}}{{sample}}{{/tableCellContent}}
+|{{#tableCellContent}}{{default_value}}{{/tableCellContent}}
 |{{#tableCellContent}}_{{optional}}_{{/tableCellContent}}
 {{/parameters}}
 |===

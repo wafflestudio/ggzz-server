@@ -1,0 +1,13 @@
+[[Letter-Interaction-API]]
+== 끄적 상호작용 API
+
+[[Letter-Interaction-Like]]
+=== 끄적 좋아요하기
+
+operation::letter-interaction/like[snippets='http-request,path-parameters,http-response']
+
+[[Letter-Interaction-Delete-Like]]
+=== 끄적 좋아요 취소하기
+
+operation::letter-interaction/delete-like[snippets='http-request,path-parameters,http-response']
+

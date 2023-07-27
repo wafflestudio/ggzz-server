@@ -1,48 +1,26 @@
 package com.wafflestudio.ggzz.domain.user.model
 
-import UserRole
 import com.wafflestudio.ggzz.domain.letter.model.Letter
-import com.wafflestudio.ggzz.domain.user.dto.UserDto.SignUpRequest
 import com.wafflestudio.ggzz.global.common.model.BaseTimeTraceEntity
-import jakarta.persistence.*
-import org.springframework.security.core.GrantedAuthority
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.OneToMany
 
 @Entity
 class User(
     @Column(unique = true)
-    val firebaseId: String,
-    var username: String?,
-    var nickname: String?,
+    var ggzzId: String?,
+
+    @Column(unique = true)
+    var firebaseId: String?,
+
+    @Column(unique = true)
+    var username: String,
+
     var password: String?,
-    var refreshToken: String? = null,
-    @ElementCollection(targetClass = UserRole::class, fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    val roles: Set<UserRole> = setOf(UserRole.USER), // 서버 단에서 수동으로 USER -> ADMIN 변경
-    @OneToMany(mappedBy = "user", orphanRemoval = true, cascade = [CascadeType.ALL], fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     val letters: MutableList<Letter> = mutableListOf(),
-) : BaseTimeTraceEntity() {
-    constructor(firebaseId: String, request: SignUpRequest?, encodedPassword: String?) : this(
-        firebaseId = firebaseId,
-        username = request?.username,
-        nickname = request?.nickname,
-        password = encodedPassword,
-    )
 
-    // firebaseId만 받는 생성자 추가
-    constructor(firebaseId: String) : this(
-        firebaseId = firebaseId,
-        username = null,
-        nickname = null,
-        password = null
-    )
-
-    constructor() : this(
-        firebaseId = "",
-        username = "",
-        nickname = "",
-        password = "",
-    )
-
-    fun getAuthorities(): Set<GrantedAuthority> = roles
-
-}
+    ) : BaseTimeTraceEntity()

@@ -1,0 +1,7 @@
+[[My-Letter-API]]
+== 내 끄적 API
+
+[[My-Letter-List]]
+=== 내 끄적 목록 조회하기
+
+operation::my-letter/list[snippets='http-request,http-response']

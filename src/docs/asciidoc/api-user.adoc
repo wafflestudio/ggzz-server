@@ -1,0 +1,7 @@
+[[User-API]]
+== 회원 API
+
+[[User-Me]]
+=== 내 정보 조회하기
+
+operation::user/me[snippets='http-request,http-response']

@@ -5,21 +5,15 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
 import java.io.ByteArrayInputStream
 
-interface FirebaseConfig {
-    fun verifyId(id: String): String
-    fun getIdByToken(token: String): String
-}
+@Configuration
+class FirebaseConfig {
 
-@Service
-class FirebaseConfigImpl(
-    @Value("\${google-services.json}") private val googleServicesJsonString: String
-) : FirebaseConfig {
-    private val firebaseAuth: FirebaseAuth
-
-    init {
+    @Bean
+    fun firebaseAuth(@Value("\${google-services.json}") googleServicesJsonString: String): FirebaseAuth {
         try {
             val googleCredentials =
                 GoogleCredentials.fromStream(ByteArrayInputStream(googleServicesJsonString.toByteArray()))
@@ -29,16 +23,11 @@ class FirebaseConfigImpl(
                 .build()
 
             FirebaseApp.initializeApp(options)
-            firebaseAuth = FirebaseAuth.getInstance()
+            return FirebaseAuth.getInstance()
         } catch (e: Exception) {
             e.printStackTrace()
             throw IllegalStateException("Failed to initialize FirebaseAuth.")
         }
     }
 
-    override fun verifyId(id: String): String =
-        firebaseAuth.getUser(id).uid
-
-    override fun getIdByToken(token: String): String =
-        firebaseAuth.verifyIdToken(token).uid
 }

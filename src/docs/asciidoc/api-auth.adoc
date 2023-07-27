@@ -1,0 +1,27 @@
+[[Auth-API]]
+== 인증 관련 API
+
+[[GGZZ-Signup]]
+=== 끄적 회원가입
+
+operation::auth/ggzz-signup[snippets='http-request,request-fields,http-response']
+
+[[GGZZ-Signin]]
+=== 끄적 로그인
+
+operation::auth/ggzz-signup[snippets='http-request,request-fields,http-response']
+
+[[GGZZ-Refresh]]
+=== JWT 토큰 재발급
+
+operation::auth/ggzz-refresh[snippets='http-request,request-headers,http-response']
+
+[[Provider-Signup]]
+=== 소셜 회원가입
+
+operation::auth/provider-signup[snippets='http-request,request-fields,http-response']
+
+[[Provider-Signin]]
+=== 소셜 로그인
+
+operation::auth/provider-signin[snippets='http-request,request-fields,http-response']

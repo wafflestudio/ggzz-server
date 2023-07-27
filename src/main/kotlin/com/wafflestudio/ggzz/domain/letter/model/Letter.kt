@@ -1,6 +1,6 @@
 package com.wafflestudio.ggzz.domain.letter.model
 
-import com.wafflestudio.ggzz.domain.letter.dto.LetterDto.CreateRequest
+import com.wafflestudio.ggzz.domain.letter.dto.LetterCreateRequest
 import com.wafflestudio.ggzz.domain.user.model.User
 import com.wafflestudio.ggzz.global.common.model.BaseTimeTraceEntity
 import jakarta.persistence.Entity
@@ -13,8 +13,6 @@ import java.time.temporal.ChronoUnit
 class Letter(
     @ManyToOne(fetch = FetchType.LAZY)
     val user: User,
-    val title: String,
-    val summary: String,
     val longitude: Double,
     val latitude: Double,
     var text: String?,
@@ -24,10 +22,8 @@ class Letter(
     val viewableTime: Int = 0,
     val viewRange: Int = 0
 ) : BaseTimeTraceEntity() {
-    constructor(user: User, request: CreateRequest) : this(
+    constructor(user: User, request: LetterCreateRequest) : this(
         user = user,
-        title = request.title!!,
-        summary = request.summary!!,
         longitude = request.longitude!!,
         latitude = request.latitude!!,
         text = request.text,
@@ -36,7 +32,7 @@ class Letter(
         viewableTime = request.viewableTime!!,
         viewRange = request.viewRange!!
     ) {
-        user.letters?.add(this)
+        user.letters.add(this)
     }
 
     fun isViewable(): Boolean {
