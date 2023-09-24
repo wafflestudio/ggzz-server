@@ -1,20 +1,19 @@
 package com.wafflestudio.ggzz.global.config
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory
+import org.springframework.boot.json.JacksonJsonParser
 import org.springframework.context.EnvironmentAware
 import org.springframework.context.annotation.Configuration
-import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest
 
 @Configuration
-@Profile("dev", "local", "test")
 class SecretsManagerConfig : EnvironmentAware, BeanFactoryPostProcessor {
+
+    private val jsonParser = JacksonJsonParser()
     private lateinit var env: Environment
 
     override fun setEnvironment(environment: Environment) {
@@ -22,13 +21,11 @@ class SecretsManagerConfig : EnvironmentAware, BeanFactoryPostProcessor {
     }
 
     override fun postProcessBeanFactory(beanFactory: ConfigurableListableBeanFactory) {
-        val secretNames = env.getProperty("secrets-manager", "").split(",")
-        val region = Region.AP_NORTHEAST_2
-        val objectMapper = jacksonObjectMapper()
-        secretNames.forEach { secretName ->
-            val secretString = getSecretString(secretName, region)
-            val map = objectMapper.readValue<Map<String, String>>(secretString)
-            map.forEach { (key, value) -> System.setProperty(key, value) }
+        env.getProperty("secrets-manager")?.split(",")?.forEach { secretName ->
+            val secretString = getSecretString(secretName, Region.AP_NORTHEAST_2)
+            jsonParser.parseMap(secretString).forEach { (key, value) ->
+                System.setProperty(key, value.toString())
+            }
         }
     }
 

@@ -6,6 +6,7 @@ import com.wafflestudio.ggzz.global.common.exception.CustomException.*
 import com.wafflestudio.ggzz.global.common.exception.ErrorType.BadRequest.CONSTRAINT_VIOLATION
 import com.wafflestudio.ggzz.global.common.exception.ErrorType.BadRequest.INVALID_FIELD
 import jakarta.validation.ConstraintViolationException
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -15,6 +16,9 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException
 
 @RestControllerAdvice
 class CustomControllerAdvice {
+
+    private val logger = LoggerFactory.getLogger("ExceptionLogger")
+
     @ExceptionHandler(BadRequestException::class)
     fun badRequest(e: BadRequestException) = ResponseEntity(ErrorResponse(e), HttpStatus.BAD_REQUEST)
 
@@ -51,4 +55,10 @@ class CustomControllerAdvice {
 
     @ExceptionHandler(ServerErrorException::class)
     fun serverError(e: ServerErrorException) = ResponseEntity(ErrorResponse(e), HttpStatus.INTERNAL_SERVER_ERROR)
+
+    @ExceptionHandler(Exception::class)
+    fun exception(e: Exception): ResponseEntity<ErrorResponse> {
+        logger.warn("Unexpected Exception", e)
+        return ResponseEntity(ErrorResponse(InternalServerError(e.message ?: "")), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 }

@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: test
+
+---
+
+ggzz:
+  jwt:
+    issuer: ggzz-server
+    secret: WAFFLE_STUDIO_GGZZ_JSON_WEB_TOKEN_SECRET_KEY
+    expiration: 7200
+
+logging:
+  level:
+    org.springframework.web: debug
+    org.springframework.security: debug

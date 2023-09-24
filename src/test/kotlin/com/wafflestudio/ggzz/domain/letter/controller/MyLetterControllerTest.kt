@@ -1,76 +1,88 @@
 package com.wafflestudio.ggzz.domain.letter.controller
 
-import com.wafflestudio.ggzz.domain.letter.service.LetterService
-import com.wafflestudio.ggzz.domain.user.dto.UserDto
-import com.wafflestudio.ggzz.domain.user.model.User
-import com.wafflestudio.ggzz.domain.user.repository.UserRepository
-import com.wafflestudio.ggzz.domain.user.service.UserService
-import com.wafflestudio.ggzz.global.config.FirebaseConfig
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import com.ninjasquad.springmockk.MockkBean
+import com.wafflestudio.ggzz.domain.auth.model.GgzzToken
+import com.wafflestudio.ggzz.domain.letter.dto.LetterResponse
+import com.wafflestudio.ggzz.domain.letter.service.MyLetterService
+import com.wafflestudio.ggzz.global.common.dto.ListResponse
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.getDocumentRequest
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.getDocumentResponse
+import io.kotest.core.annotation.DisplayName
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.extensions.spring.SpringExtension
+import io.mockk.every
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext
+import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
+import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import java.time.LocalDateTime
 
+@AutoConfigureRestDocs
 @WebMvcTest(MyLetterController::class)
-@AutoConfigureMockMvc
-class MyLetterControllerTest @Autowired constructor(
-    val mockMvc: MockMvc
-) {
-    @MockBean lateinit var letterService: LetterService
-    @MockBean lateinit var userService: UserService
-    @MockBean lateinit var userRepository: UserRepository
-    @MockBean lateinit var firebaseConfig: FirebaseConfig
+@MockkBean(JpaMetamodelMappingContext::class)
+@DisplayName("MyLetterController 테스트")
+class MyLetterControllerTest(
+    private val mockMvc: MockMvc,
+    @MockkBean private val myLetterService: MyLetterService
+) : DescribeSpec() {
 
-    @BeforeEach
-    fun setAuthentication() {
-        val signUpRequest = UserDto.SignUpRequest("test_username", "test_nickname", "test_password")
-        val createdUser = User("test_firebase_id", "test_username", "test_nickname", "encoded_password")
+    override fun extensions() = listOf(SpringExtension)
 
-        // userService.updateOrCreate() 메서드의 Mock 설정
-        Mockito.`when`(userService.updateOrCreate(signUpRequest)).thenReturn(createdUser)
-
-        // firebaseConfig.getIdByToken() 메서드의 Mock 설정
-        Mockito.`when`(firebaseConfig.getIdByToken(ArgumentMatchers.anyString())).thenReturn("test_firebase_id")
-
-        // 인증된 사용자 설정
-        val authentication = Mockito.mock(Authentication::class.java)
-        Mockito.`when`(authentication.isAuthenticated).thenReturn(true)
-        Mockito.`when`(authentication.principal).thenReturn(
-            org.springframework.security.core.userdetails.User(
-                "test_username",
-                "test_password",
-                emptyList()
+    init {
+        this.describe("내 끄적 조회") {
+            every { myLetterService.getMyLetters(any()) } returns ListResponse(
+                listOf(
+                    LetterResponse(
+                        id = 1L,
+                        createdAt = LocalDateTime.now(),
+                        createdBy = "username1",
+                        longitude = 126.9779692,
+                        latitude = 37.566535
+                    ),
+                    LetterResponse(
+                        id = 2L,
+                        createdAt = LocalDateTime.now(),
+                        createdBy = "username2",
+                        longitude = 126.9779692,
+                        latitude = 37.566535
+                    )
+                )
             )
-        )
 
-        // SecurityContextHolder에 인증 정보 설정
-        SecurityContextHolder.getContext().authentication = authentication
+            context("GET /api/v1/me/letters") {
+                it("200 OK") {
+                    mockMvc.perform(
+                        get("/api/v1/me/letters")
+                            .with(authentication(GgzzToken.of(1L)))
+                    ).andExpectAll(
+                        status().isOk,
+                        jsonPath("$.count").value(2),
+                        jsonPath("$.data[0].id").value(1L),
+                        jsonPath("$.data[0].createdAt").exists(),
+                        jsonPath("$.data[0].createdBy").value("username1"),
+                        jsonPath("$.data[0].longitude").value(126.9779692),
+                        jsonPath("$.data[0].latitude").value(37.566535),
+                        jsonPath("$.data[1].id").value(2L),
+                        jsonPath("$.data[1].createdAt").exists(),
+                        jsonPath("$.data[1].createdBy").value("username2"),
+                        jsonPath("$.data[1].longitude").value(126.9779692),
+                        jsonPath("$.data[1].latitude").value(37.566535)
+                    ).andDo(
+                        document(
+                            "my-letter/list",
+                            getDocumentRequest(),
+                            getDocumentResponse()
+                        )
+                    ).andDo(MockMvcResultHandlers.print())
+                }
+            }
+        }
     }
 
-    @AfterEach
-    fun cleanSecurityContext() {
-        SecurityContextHolder.clearContext() // 인증 정보 제거
-    }
-
-    @Test
-    fun getMyLetters() {
-        // when
-        val result = this.mockMvc.perform(get("/api/v1/me/letters")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", "Bearer test_token"))
-
-        // then
-        result.andExpect(status().isOk)
-    }
 }

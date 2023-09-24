@@ -14,31 +14,6 @@ spring:
     multipart:
       max-file-size: 2MB
       max-request-size: 20MB
-  jackson:
-    property-naming-strategy: SNAKE_CASE
-
----
-
-spring:
-  jpa:
-    open-in-view: false
-    generate-ddl: false
-    hibernate:
-      ddl-auto: validate
-  servlet:
-    multipart:
-      max-file-size: 2MB
-      max-request-size: 20MB
-  jackson:
-    property-naming-strategy: SNAKE_CASE
-
----
-
-auth.jwt:
-  issuer: ${jwt-issuer}
-  jwtSecret: ${jwt-secret-key}
-  jwtExpiration: 7200
-  refreshExpiration: 172800
 
 cloud:
   aws:
@@ -51,14 +26,11 @@ cloud:
     s3:
       bucket: ggzz-bucket-dev
 
----
-
-server:
-  servlet:
-    session:
-      cookie:
-        same-site: none
-        secure: true
+ggzz:
+  jwt:
+    issuer: ggzz-server
+    secret: WAFFLE_STUDIO_GGZZ_JSON_WEB_TOKEN_SECRET_KEY
+    expiration: 7200
 
 ---
 
@@ -66,38 +38,21 @@ spring:
   config:
     activate:
       on-profile: dev
-  datasource:
-    url: ${dev.datasource.url}
-    username: ${dev.datasource.username}
-    password: ${dev.datasource.password}
 
 secrets-manager: dev/ggzz-server
 
-auth.jwt:
-  issuer: ${jwt-issuer}
-  jwtSecret: ${jwt-secret-key}
-  jwtExpiration: 7200
-  refreshExpiration: 172800
 ---
 
 spring:
   config:
     activate:
       on-profile: local
-  jpa:
-    open-in-view: false
-    generate-ddl: true
-    hibernate:
-      ddl-auto: update
+
   datasource:
     url: jdbc:mysql://localhost:3306/infp_db
     username: infp
     password: INFP_admin_01
 
-secrets-manager: dev/ggzz-server
-
-auth.jwt:
-  issuer: GGZZ
-  jwtSecret: WAFFLE_STUDIO_GGZZ_JSON_WEB_TOKEN_SECRET_KEY
-  jwtExpiration: 7200
-  refreshExpiration: 172800
+logging:
+  level:
+    org.springframework.security: TRACE

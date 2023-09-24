@@ -1,0 +1,22 @@
+[[Letter-API]]
+== 끄적 기본 API
+
+[[Letter-Create]]
+=== 끄적 생성하기
+
+operation::letter/create[snippets='http-request,request-parts,http-response']
+
+[[Letter-List]]
+=== 끄적 목록 가져오기
+
+operation::letter/list[snippets='http-request,query-parameters,http-response']
+
+[[Letter-Detail]]
+=== 끄적 상세 가져오기
+
+operation::letter/detail[snippets='http-request,query-parameters,http-response']
+
+[[Letter-Delete]]
+=== 끄적 삭제하기
+
+operation::letter/delete[snippets='http-request,path-parameters,http-response']

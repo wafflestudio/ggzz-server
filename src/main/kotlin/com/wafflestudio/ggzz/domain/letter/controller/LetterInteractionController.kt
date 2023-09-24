@@ -1,14 +1,10 @@
 package com.wafflestudio.ggzz.domain.letter.controller
 
-import com.wafflestudio.ggzz.domain.letter.dto.LetterDto
+import com.wafflestudio.ggzz.domain.auth.model.CurrentUserId
+import com.wafflestudio.ggzz.domain.letter.dto.LetterResponse
 import com.wafflestudio.ggzz.domain.letter.service.LetterInteractionService
-import com.wafflestudio.ggzz.domain.user.model.CurrentUser
-import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.slf4j.LoggerFactory
+import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/api/v1/letters")
@@ -16,20 +12,24 @@ class LetterInteractionController(
     private val letterInteractionService: LetterInteractionService
 ) {
 
+    private val logger = LoggerFactory.getLogger(LetterInteractionController::class.java)
+
     @PostMapping("/{letter-id}/like")
     fun likeLetter(
-        @CurrentUser userId: Long,
+        @CurrentUserId userId: Long,
         @PathVariable("letter-id") letterId: Long
-    ): ResponseEntity<LetterDto.Response> {
-        return ResponseEntity.ok(letterInteractionService.likeLetter(userId, letterId))
+    ): LetterResponse {
+        logger.info("[{}] POST /api/v1/letters/{}/like", userId, letterId)
+        return letterInteractionService.likeLetter(userId, letterId)
     }
 
     @DeleteMapping("/{letter-id}/like")
     fun unlikeLetter(
-        @CurrentUser userId: Long,
+        @CurrentUserId userId: Long,
         @PathVariable("letter-id") letterId: Long
-    ): ResponseEntity<LetterDto.Response> {
-        return ResponseEntity.ok(letterInteractionService.unlikeLetter(userId, letterId))
+    ): LetterResponse {
+        logger.info("[{}] DELETE /api/v1/letters/{}/like", userId, letterId)
+        return letterInteractionService.unlikeLetter(userId, letterId)
     }
 
 }

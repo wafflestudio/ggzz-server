@@ -1,230 +1,237 @@
 package com.wafflestudio.ggzz.domain.letter.controller
 
-import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentRequest
-import com.wafflestudio.ggzz.domain.ApiDocumentUtils.Companion.getDocumentResponse
-import com.wafflestudio.ggzz.domain.letter.dto.LetterDto
+import aws.smithy.kotlin.runtime.util.encodeBase64
+import com.ninjasquad.springmockk.MockkBean
+import com.wafflestudio.ggzz.domain.auth.model.GgzzToken
+import com.wafflestudio.ggzz.domain.letter.dto.LetterCreateRequest
+import com.wafflestudio.ggzz.domain.letter.dto.LetterDetailResponse
+import com.wafflestudio.ggzz.domain.letter.dto.LetterResponse
 import com.wafflestudio.ggzz.domain.letter.service.LetterService
-import com.wafflestudio.ggzz.domain.user.dto.UserDto
-import com.wafflestudio.ggzz.domain.user.model.User
-import com.wafflestudio.ggzz.domain.user.repository.UserRepository
-import com.wafflestudio.ggzz.domain.user.service.UserService
 import com.wafflestudio.ggzz.global.common.dto.ListResponse
-import com.wafflestudio.ggzz.global.config.FirebaseConfig
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.*
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.given
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
+import com.wafflestudio.ggzz.restdocs.*
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.getDocumentRequest
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.getDocumentResponse
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.pathParameter
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.requestParameter
+import com.wafflestudio.ggzz.restdocs.ApiDocumentUtils.Companion.requestPart
+import io.kotest.core.annotation.DisplayName
+import io.kotest.core.spec.style.DescribeSpec
+import io.kotest.extensions.spring.SpringExtension
+import io.mockk.every
+import io.mockk.justRun
+import io.mockk.slot
+import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.http.MediaType
-import org.springframework.mock.web.MockMultipartFile
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext
+import org.springframework.mock.web.MockPart
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*
-import org.springframework.restdocs.operation.preprocess.Preprocessors.*
-import org.springframework.restdocs.payload.PayloadDocumentation.*
-import org.springframework.restdocs.request.RequestDocumentation.*
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import java.time.LocalDateTime
-import org.springframework.security.core.userdetails.User as SecurityUser
 
+@AutoConfigureRestDocs
 @WebMvcTest(LetterController::class)
-@AutoConfigureMockMvc
-class LetterControllerTest @Autowired constructor(
-    val mockMvc: MockMvc
-) {
-    @MockBean
-    lateinit var letterService: LetterService
+@MockkBean(JpaMetamodelMappingContext::class)
+@DisplayName("LetterController 테스트")
+class LetterControllerTest(
+    private val mockMvc: MockMvc,
+    @MockkBean private val letterService: LetterService
+) : DescribeSpec() {
 
-    @MockBean
-    lateinit var userService: UserService
+    override fun extensions() = listOf(SpringExtension)
 
-    @MockBean
-    lateinit var userRepository: UserRepository
-
-    @MockBean
-    lateinit var firebaseConfig: FirebaseConfig
-
-    @BeforeEach
-    fun setAuthentication() {
-        val signUpRequest = UserDto.SignUpRequest("test_username", "test_nickname", "test_password")
-        val createdUser = User("test_firebase_id", "test_username", "test_nickname", "encoded_password")
-
-        // userService.updateOrCreate() 메서드의 Mock 설정
-        `when`(userService.updateOrCreate(signUpRequest)).thenReturn(createdUser)
-
-        // firebaseConfig.getIdByToken() 메서드의 Mock 설정
-        `when`(firebaseConfig.getIdByToken(anyString())).thenReturn("test_firebase_id")
-
-        // 인증된 사용자 설정
-        val authentication = mock(Authentication::class.java)
-        `when`(authentication.isAuthenticated).thenReturn(true)
-        `when`(authentication.principal).thenReturn(SecurityUser("test_username", "test_password", emptyList()))
-
-        // SecurityContextHolder에 인증 정보 설정
-        SecurityContextHolder.getContext().authentication = authentication
-    }
-
-
-    @AfterEach
-    fun cleanSecurityContext() {
-        SecurityContextHolder.clearContext() // 인증 정보 제거
-    }
-
-    @Test
-    fun postLetterTest() {
-        // POST 요청을 수행하고 응답을 검증
-        val result = this.mockMvc.perform(
-            MockMvcRequestBuilders.post("/api/v1/letters")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(
-                    """{
-                    |"title":"test_title",
-                    |"summary":"test_summary",
-                    |"text":"test_text",
-                    |"longitude": 126.0,
-                    |"latitude": 37.0
-                    |}""".trimMargin()
+    init {
+        this.describe("끄적 생성") {
+            val requestSlot = slot<LetterCreateRequest>()
+            every { letterService.postLetter(any(), capture(requestSlot)) } answers {
+                val request = requestSlot.captured
+                LetterDetailResponse(
+                    id = 1L,
+                    createdAt = LocalDateTime.now(),
+                    createdBy = "username",
+                    longitude = request.longitude!!,
+                    latitude = request.latitude!!,
+                    text = request.text,
+                    image = "image-url",
+                    voice = "voice-url"
                 )
-                .header("Authorization", "Bearer test_token")
-                .with(csrf())
-        )
+            }
 
-        // then
-        result.andExpect(status().isOk)
-//            .andDo(
-//                document(
-//                    "postLetter/200",
-//                    getDocumentRequest(),
-//                    getDocumentResponse(),
-//                    requestFields(
-//                        fieldWithPath("title").description("편지 제목"),
-//                        fieldWithPath("summary").description("편지 요약"),
-//                        fieldWithPath("longitude").description("경도"),
-//                        fieldWithPath("latitude").description("위도"),
-//                        fieldWithPath("text").description("편지 내용(글)").optional(),
-//                        fieldWithPath("viewable_time").description("편지 공개 시간").optional(),
-//                        fieldWithPath("view_range").description("편지 공개 범위").optional()
-//                    ),
-//                    responseFields(
-//                        fieldWithPath("id").description("API에 사용되는 편지 ID"),
-//                        fieldWithPath("created_at").description("편지 생성일자"),
-//                        fieldWithPath("created_by").description("편지 생성자 닉네임"),
-//                        fieldWithPath("title").description("편지 제목"),
-//                        fieldWithPath("summary").description("편지 내용"),
-//                        fieldWithPath("longitude").description("경도"),
-//                        fieldWithPath("latitude").description("위도")
-//                    )
-//                )
-//            )
-    }
+            context("POST /api/v1/letters") {
+                it("200 OK") {
+                    mockMvc.perform(
+                        multipart("/api/v1/letters")
+                            .file("image", "image BLOB".encodeBase64().toByteArray())
+                            .file("voice", "voice BLOB".encodeBase64().toByteArray())
+                            .part(MockPart("longitude", "126.9779692".toByteArray()))
+                            .part(MockPart("latitude", "37.566535".toByteArray()))
+                            .part(MockPart("text", "끄적 생성".toByteArray()))
+                            .with(csrf().asHeader())
+                            .with(authentication(GgzzToken.of(1L)))
+                    ).andExpectAll(
+                        status().isOk,
+                        jsonPath("$.id").value(1L),
+                        jsonPath("$.createdAt").exists(),
+                        jsonPath("$.createdBy").value("username"),
+                        jsonPath("$.longitude").value(126.9779692),
+                        jsonPath("$.latitude").value(37.566535),
+                        jsonPath("$.text").value("끄적 생성"),
+                        jsonPath("$.image").value("image-url"),
+                        jsonPath("$.voice").value("voice-url"),
+                    ).andDo(
+                        document(
+                            "letter/create",
+                            getDocumentRequest(),
+                            getDocumentResponse(),
+                            requestPart(
+                                "image"         partType FILE   means "이미지 파일" isOptional true,
+                                "voice"         partType FILE   means "음성 파일" isOptional true,
+                                "longitude"     partType DOUBLE means "경도" formattedAs "[-180,180]" example "126.9779692",
+                                "latitude"      partType DOUBLE means "위도" formattedAs "[-90,90]" example "37.566535",
+                                "text"          partType TEXT   means "끄적 내용" formattedAs "Not Blank" example "끄적 생성",
+                                "viewableTime"  partType INT    means "조회 가능 시간" formattedAs "[0,24]" withDefaultValue "0" isOptional true,
+                                "viewRange"     partType INT    means "조회 가능 범위 [m]" formattedAs "[0,200]" withDefaultValue "0" isOptional true
+                            ),
+                        )
+                    ).andDo(MockMvcResultHandlers.print())
+                }
+            }
+        }
 
-    @Test
-    fun getLettersTest() {
-        // given
-        val letters = mutableListOf<LetterDto.Response>()
-        letters.add(LetterDto.Response(0L, LocalDateTime.now(), "Junhyeong Kim", "Letter 1", "summary", 127.0, 37.0))
-        letters.add(LetterDto.Response(1L, LocalDateTime.now(), "Yeonghyeon Ko", "Letter 2", "summary", 127.0, 37.0))
-        val response = ListResponse(letters)
-        given(
-            letterService.getLetters(
-                anyOrNull(),
-                anyInt()
+        this.describe("끄적 리스트 조회") {
+            every { letterService.getLetters(any(), any()) } returns ListResponse(
+                listOf(
+                    LetterResponse(
+                        1L,
+                        LocalDateTime.now(),
+                        createdBy = "username1",
+                        longitude = 126.9779692,
+                        latitude = 37.566535
+                    ),
+                    LetterResponse(
+                        id = 2L,
+                        createdAt = LocalDateTime.now(),
+                        createdBy = "username2",
+                        longitude = 126.9779692,
+                        latitude = 37.566535
+                    )
+                )
             )
-        ).willReturn(response)
 
-        // when
-        val result = this.mockMvc.perform(
-            get("/api/v1/letters")
-                .param("longitude", "127.0")
-                .param("latitude", "37.0")
-                .param("range", "200")
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer test_token")
-        )
+            context("GET /api/v1/letters") {
+                it("200 OK") {
+                    mockMvc.perform(
+                        get("/api/v1/letters")
+                            .param("longitude", "126.9779692")
+                            .param("latitude", "37.566535")
+                            .param("range", "100")
+                            .with(authentication(GgzzToken.of(1L)))
+                    ).andExpectAll(
+                        status().isOk,
+                        jsonPath("$.count").value(2),
+                        jsonPath("$.data[0].id").value(1L),
+                        jsonPath("$.data[0].createdAt").exists(),
+                        jsonPath("$.data[0].createdBy").value("username1"),
+                        jsonPath("$.data[0].longitude").value(126.9779692),
+                        jsonPath("$.data[0].latitude").value(37.566535),
+                        jsonPath("$.data[1].id").value(2L),
+                        jsonPath("$.data[1].createdAt").exists(),
+                        jsonPath("$.data[1].createdBy").value("username2"),
+                        jsonPath("$.data[1].longitude").value(126.9779692),
+                        jsonPath("$.data[1].latitude").value(37.566535),
+                    ).andDo(
+                        document(
+                            "letter/list",
+                            getDocumentRequest(),
+                            getDocumentResponse(),
+                            requestParameter(
+                                "longitude" parameterType DOUBLE means "현재 경도" formattedAs "[-180,180]" example "126.9779692",
+                                "latitude"  parameterType DOUBLE means "현재 위도" formattedAs "[-90,90]" example "37.566535",
+                                "range"     parameterType INT    means "조회 범위 [m]" formattedAs "[1,1000]" withDefaultValue "200" isOptional true
+                            )
+                        )
+                    ).andDo(MockMvcResultHandlers.print())
+                }
+            }
+        }
 
-        // then
-        result.andExpect(status().isOk)
-    }
-
-    @Test
-    fun getLetterTest() {
-        // given
-        val response = LetterDto.DetailResponse(
-            id = 12,
-            createdAt = LocalDateTime.now(),
-            createdBy = "Someone",
-            title = "New Letter",
-            summary = "blah blah",
-            longitude = 127.0,
-            latitude = 37.0,
-            text = "Hello",
-            image = null,
-            voice = null
-        )
-        given(
-            letterService.getLetter(
-                anyLong(),
-                anyOrNull()
+        this.describe("끄적 단건 조회") {
+            every { letterService.getLetter(any(), any()) } returns LetterDetailResponse(
+                id = 1L,
+                createdAt = LocalDateTime.now(),
+                createdBy = "username",
+                longitude = 126.9779692,
+                latitude = 37.566535,
+                text = "끄적 내용",
+                image = "image-url",
+                voice = "voice-url"
             )
-        ).willReturn(response)
 
-        // when
-        val result = this.mockMvc.perform(
-            get("/api/v1/letters/{id}", 12)
-                .param("longitude", "127.0")
-                .param("latitude", "37.0")
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer test_token")
-        )
+            context("GET /api/v1/letters/{id}") {
+                it("200 OK") {
+                    mockMvc.perform(
+                        get("/api/v1/letters/{id}", 1L)
+                            .param("longitude", "126.9779692")
+                            .param("latitude", "37.566535")
+                            .with(authentication(GgzzToken.of(1L)))
+                    ).andExpectAll(
+                        status().isOk,
+                        jsonPath("$.id").value(1L),
+                        jsonPath("$.createdAt").exists(),
+                        jsonPath("$.createdBy").value("username"),
+                        jsonPath("$.longitude").value(126.9779692),
+                        jsonPath("$.latitude").value(37.566535),
+                        jsonPath("$.text").value("끄적 내용"),
+                        jsonPath("$.image").value("image-url"),
+                        jsonPath("$.voice").value("voice-url"),
+                    ).andDo(
+                        document(
+                            "letter/detail",
+                            getDocumentRequest(),
+                            getDocumentResponse(),
+                            pathParameter(
+                                "id" parameterType LONG means "끄적 ID" example "1"
+                            ),
+                            requestParameter(
+                                "longitude" parameterType DOUBLE means "현재 경도" formattedAs "[-180,180]" example "126.9779692",
+                                "latitude"  parameterType DOUBLE means "현재 위도" formattedAs "[-90,90]" example "37.566535"
+                            )
+                        )
+                    ).andDo(MockMvcResultHandlers.print())
+                }
+            }
+        }
 
-        // then
-        result.andExpect(status().isOk)
+        this.describe("끄적 삭제") {
+            justRun { letterService.deleteLetter(any(), any()) }
+
+            context("DELETE /api/v1/letters/{id}") {
+                it("200 OK") {
+                    mockMvc.perform(
+                        delete("/api/v1/letters/{id}", 1L)
+                            .with(csrf().asHeader())
+                            .with(authentication(GgzzToken.of(1L)))
+                    ).andExpectAll(
+                        status().isOk
+                    ).andDo(
+                        document(
+                            "letter/delete",
+                            getDocumentRequest(),
+                            getDocumentResponse(),
+                            pathParameter(
+                                "id" parameterType LONG means "끄적 ID" example "1"
+                            )
+                        )
+                    ).andDo(MockMvcResultHandlers.print())
+                }
+            }
+        }
+
     }
 
-    @Test
-    fun deleteLetterTest() {
-        // when
-        val result = this.mockMvc.perform(
-            delete("/api/v1/letters/{id}", 12)
-                .header("Authorization", "Bearer test_token")
-                .with(csrf())
-        )
-
-        // then
-        result.andExpect(status().isOk)
-    }
-
-    @Test
-    fun putResourceTest() {
-        // given
-        val imageContent = ByteArray(100)
-        val imageFile = MockMultipartFile("image", "test.png", MediaType.IMAGE_PNG_VALUE, imageContent)
-        val voiceContent = ByteArray(100)
-        val voiceFile = MockMultipartFile("voice", "test.mp3", "audio/mpeg", voiceContent)
-
-        // when
-        val result = this.mockMvc.perform(
-            multipart("/api/v1/letters/{id}/source", 12)
-                .file(imageFile)
-                .file(voiceFile)
-                .with { request -> request.method = "PUT"; request }
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer test_token")
-                .with(csrf())
-        )
-
-        // then
-        result.andExpect(status().isOk)
-    }
 }
