@@ -108,6 +108,13 @@ tasks {
 
     bootJar {
         dependsOn(asciidoctor)
+
+        from(asciidoctor.get().outputDir) {
+            into("BOOT-INF/classes/static/docs")
+        }
+
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
         archiveFileName.set("ggzz-server.jar")
     }
 }
